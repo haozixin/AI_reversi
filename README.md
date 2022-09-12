@@ -9,7 +9,7 @@ You must read fully and carefully the assignment specification and instructions 
 * **Deadline Wiki, Video & Final Submission:** Monday 17th October, 2022 @ 11:59pm (start of Week 12)
 * **Course Weight:** 5% (preliminary competition) + 10% (final competition) + 5% (video) + 15% (Wiki)
 * **Assignment type:**: Groups of 3
-* **CLOs covered:** 1-5
+* **CLOs covered:** 1-5 
 * **Submission method:** via git tagging (see below for instructions)
 
 The purpose of this project is to implement a Reversi Autonomous Agent that can play and compete in the UoM COMP90054-2022 Reversi:
