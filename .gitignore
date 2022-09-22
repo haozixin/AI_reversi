@@ -2,6 +2,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 output/
+
 .idea/
 
-config/token.txt
+
+configs/token.txt
+
