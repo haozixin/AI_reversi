@@ -7,5 +7,4 @@ class myAgent(Agent):
         super().__init__(_id)
     
     def SelectAction(self,actions,game_state):
-        print("test")
         return random.choice(actions)
