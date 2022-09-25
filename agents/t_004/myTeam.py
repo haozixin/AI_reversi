@@ -13,7 +13,7 @@ class myAgent(Agent):
         # make sure the current agent id is correct
         self.rule.current_agent_index = self.id
         self.rule.agent_colors = None
-        self.weights_table = self.generate_static_weights(1)
+        self.weights_table = self.generate_static_weights(2)
 
     def SelectAction(self, actions, game_state):
         # we use BLACK as the first player and WHITE as the second player
@@ -100,7 +100,6 @@ class myAgent(Agent):
         return next_states
 
     def heuristic_function(self, game_state):
-        coins = 0
         """
         Component of the heuristic function. -- coin_parity
         This is a heuristic function that returns the difference between the number of pieces of the current player and the
@@ -137,10 +136,15 @@ class myAgent(Agent):
                 elif board[i][j] == opponent_color:
                     temp_min_player_score += 1
                     temp_min_utility_value += self.weights_table[i][j]
+
         total_number = temp_max_player_score + temp_min_player_score
         difference = temp_max_player_score - temp_min_player_score
+        coins = (difference * 100 / total_number)
+        utility_value = (temp_max_utility_value - temp_min_utility_value) * 100 / total_number
 
-        h = corners + (difference * 100 / total_number)
+        h = 2*corners + coins + utility_value
+        if total_number > 56:
+            h = 2*corners + 5*coins + utility_value
 
 
         return h
@@ -179,6 +183,22 @@ class myAgent(Agent):
             for y in [0, GRID_SIZE - 1]:
                 if game_state[x][y] == current_player_color:
                     Max_player_corner += 1
+                    if x == 0 and y == 0:
+                        self.weights_table[1][1] *= -1
+                        self.weights_table[1][0] *= -1
+                        self.weights_table[0][1] *= -1
+                    elif x == 0 and y == GRID_SIZE - 1:
+                        self.weights_table[1][GRID_SIZE - 2] *= -1
+                        self.weights_table[1][GRID_SIZE - 1] *= -1
+                        self.weights_table[0][GRID_SIZE - 2] *= -1
+                    elif x == GRID_SIZE - 1 and y == 0:
+                        self.weights_table[GRID_SIZE - 2][1] *= -1
+                        self.weights_table[GRID_SIZE - 2][0] *= -1
+                        self.weights_table[GRID_SIZE - 1][1] *= -1
+                    elif x == GRID_SIZE - 1 and y == GRID_SIZE - 1:
+                        self.weights_table[GRID_SIZE - 2][GRID_SIZE - 2] *= -1
+                        self.weights_table[GRID_SIZE - 2][GRID_SIZE - 1] *= -1
+                        self.weights_table[GRID_SIZE - 1][GRID_SIZE - 2] *= -1
                 elif game_state[x][y] == opponent_color:
                     Min_player_corner += 1
         if (Max_player_corner + Min_player_corner) != 0:
