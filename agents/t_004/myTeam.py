@@ -77,6 +77,7 @@ class myAgent(Agent):
         print("Mobility us:", mobility)
         print("Mobility op:", mobility_op)
         print("pieces:", self.pieceCountHeuristic(game_state))
+
         return weights[0] * self.cornerHeuristic(game_state) \
                + weights[1] * self.pieceCountHeuristic(game_state) \
                + weights[2] * self.mobilityHeuristic(mobility, mobility_op)
@@ -138,6 +139,7 @@ class myAgent(Agent):
             [70, 65, 3],  # 61
             [70, 70, 3],  # 62
             [70, 100, 3],  # 63
+            [0, 100, 0]  # 64
         ]
 
         if curr_board_time < EARLY_GAME_THRESHOLD:
@@ -158,6 +160,8 @@ class myAgent(Agent):
             return weight_sets[7]
         elif curr_board_time == LATE_GAME_THRESHOLD + 6:
             return weight_sets[8]
+        else:  # curr_board_time == 64
+            return weight_sets[9]
 
 
 def generateSuccessor(game_state, action, agent_id):
@@ -174,7 +178,7 @@ def generateSuccessor(game_state, action, agent_id):
             flag = False
             # Only searching for updates if the next piece in the direction is from the agent's opponent
             # if next_state.board[cur_pos[0]][cur_pos[1]] == self.agent_colors[(agent_id+1)%2]:
-            while cur_pos in validPos() and next_state.board[cur_pos[0]][cur_pos[1]] != Cell.EMPTY:
+            while validPos(cur_pos) and next_state.board[cur_pos[0]][cur_pos[1]] != Cell.EMPTY:
                 if next_state.board[cur_pos[0]][cur_pos[1]] == update_color:
                     flag = True
                     break
@@ -195,7 +199,6 @@ def gameEnds(game_state):
 
 
 def getLegalActions(game_state, agent_id):
-    validPosList = validPos()
     actions = []
     # print(f"Current game state: \n{boardToString(game_state.board,GRID_SIZE)}")
     for x in range(GRID_SIZE):
@@ -209,9 +212,9 @@ def getLegalActions(game_state, agent_id):
                         break
 
                     temp_pos = tuple(map(operator.add, pos, direction))
-                    if temp_pos in validPosList and game_state.getCell(temp_pos) != Cell.EMPTY and game_state.getCell(
+                    if validPos(temp_pos) and game_state.getCell(temp_pos) != Cell.EMPTY and game_state.getCell(
                             temp_pos) != game_state.agent_colors[agent_id]:
-                        while temp_pos in validPosList:
+                        while validPos(temp_pos):
                             if game_state.getCell(temp_pos) == Cell.EMPTY:
                                 break
                             if game_state.getCell(temp_pos) == game_state.agent_colors[agent_id]:
@@ -225,12 +228,9 @@ def getLegalActions(game_state, agent_id):
     return actions
 
 
-def validPos():
-    pos_list = []
-    for x in range(GRID_SIZE):
-        for y in range(GRID_SIZE):
-            pos_list.append((x, y))
-    return pos_list
+def validPos(pos):
+    x, y = pos
+    return 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE
 
 
 def getNextAgentIndex(agent_id):
