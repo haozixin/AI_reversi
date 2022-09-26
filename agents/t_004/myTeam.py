@@ -14,6 +14,7 @@ class myAgent(Agent):
         self.rule.current_agent_index = self.id
         self.rule.agent_colors = None
         self.weights_table = self.generate_static_weights(2)
+        self.stability_board = [[0 for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
 
     def SelectAction(self, actions, game_state):
         # we use BLACK as the first player and WHITE as the second player
@@ -142,10 +143,9 @@ class myAgent(Agent):
         coins = (difference * 100 / total_number)
         utility_value = (temp_max_utility_value - temp_min_utility_value) * 100 / total_number
 
-        h = 2*corners + coins + utility_value
-        if total_number > 56:
-            h = 2*corners + 5*coins + utility_value
-
+        h = 30*corners + 12*coins + 12*utility_value
+        if total_number > 57:
+            h = 30*corners + 50*coins
 
         return h
 
@@ -297,7 +297,7 @@ class myAgent(Agent):
             h_value = 0
         return h_value
 
-    def stability_heuristic(self, cell):
+    def stability_heuristic(self, cell, game_state):
         """
         Weights are associated to each of the three categories( (i) stable, (ii) semi-stable and (iii) unstable.),
         and we sum the weights up to give
@@ -308,6 +308,7 @@ class myAgent(Agent):
         In the heuristic_function(), we could get the total score of the game_state (because go through board need
         a lot of time when we do it too many times separately)
         """
+
         return None
 
 
