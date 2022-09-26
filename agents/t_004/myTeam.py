@@ -14,7 +14,7 @@ class myAgent(Agent):
         self.rule.current_agent_index = self.id
         self.rule.agent_colors = None
         self.weights_table = self.generate_static_weights(2)
-        self.stability_board = [[0 for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
+        # self.stability_board = [[0 for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
 
     def SelectAction(self, actions, game_state):
         # we use BLACK as the first player and WHITE as the second player
@@ -26,7 +26,6 @@ class myAgent(Agent):
             self.rule.agent_colors = game_state.agent_colors
 
         self.rule.current_game_state = game_state
-
 
         # remove redundant actions
         actions = list(set(actions))
@@ -113,8 +112,6 @@ class myAgent(Agent):
         # utility_value_heuristic = 0  # it is the static Weights Heuristic (could be used at the beginning of the game)
         # mobility = self.mobility_heuristic(game_state)
 
-
-
         # get the current player's color
         current_player_color = self.rule.agent_colors[self.rule.getCurrentAgentIndex()]
         # get the opponent's color
@@ -143,13 +140,11 @@ class myAgent(Agent):
         coins = (difference * 100 / total_number)
         utility_value = (temp_max_utility_value - temp_min_utility_value) * 100 / total_number
 
-        h = 30*corners + 12*coins + 12*utility_value
+        h = 30 * corners + 12 * coins + 12 * utility_value
         if total_number > 57:
-            h = 30*corners + 50*coins
+            h = 30 * corners + 50 * coins
 
         return h
-
-
 
     def utility_value(self, game_state):
         """
@@ -283,7 +278,6 @@ class myAgent(Agent):
 
         return weights
 
-
     def mobility_heuristic(self, game_state):
         """
         Component of heuristic function
@@ -296,19 +290,70 @@ class myAgent(Agent):
         else:
             h_value = 0
         return h_value
-
-    def stability_heuristic(self, cell, game_state):
-        """
-        Weights are associated to each of the three categories( (i) stable, (ii) semi-stable and (iii) unstable.),
-        and we sum the weights up to give
-        rise to a final stability value for the player. Typical weights could be 1 for stable coins, -1 for
-        unstable coins and 0 for semi-stable coins.
-
-        The function is to judge the cell/coin, if it's stable
-        In the heuristic_function(), we could get the total score of the game_state (because go through board need
-        a lot of time when we do it too many times separately)
-        """
-
-        return None
-
-
+    #
+    # def stability_heuristic(self, game_state):
+    #     """
+    #     Weights are associated to each of the three categories( (i) stable, (ii) semi-stable and (iii) unstable.),
+    #     and we sum the weights up to give
+    #     rise to a final stability value for the player. Typical weights could be 1 for stable coins, -1 for
+    #     unstable coins and 0 for semi-stable coins.
+    #
+    #     In the heuristic_function(), we could get the total score of the game_state (because go through board need
+    #     a lot of time when we do it too many times separately)
+    #     """
+    #     max_stability = 0
+    #     min_stability = 0
+    #     # get the current player's color
+    #     current_player_color = self.rule.agent_colors[self.rule.getCurrentAgentIndex()]
+    #     # get the opponent's color
+    #     opponent_color = self.rule.agent_colors[self.rule.getNextAgentIndex()]
+    #     stability_board = [[0 for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
+    #
+    #     for x in range(GRID_SIZE):
+    #         for y in range(GRID_SIZE):
+    #             cell = (x, y)
+    #             if game_state.board[x][y] == current_player_color:
+    #                 # stable cases:
+    #                 # 1. if the coin is in the corner, it's stable
+    #                 if cell in [(0, 0), (0, GRID_SIZE - 1), (GRID_SIZE - 1, 0), (GRID_SIZE - 1, GRID_SIZE - 1)]:
+    #                     max_stability += 1
+    #                     stability_board[cell[0]][cell[1]] = 1
+    #                 # 2. if the coin is in the edge, and the coin beside it is stable, it's stable
+    #                 elif cell[0] == 0 and ((game_state.getCell(0, cell[1] + 1) == current_player_color and
+    #                                         stability_board[0][cell[1] + 1] == 1)
+    #                                        or (game_state.getCell(0, cell[1] - 1) == current_player_color and
+    #                                            stability_board[0][
+    #                                                cell[1] - 1] == 1)):
+    #                     max_stability += 1
+    #                     stability_board[cell[0]][cell[1]] = 1
+    #                 elif cell[0] == GRID_SIZE - 1 and ((game_state.getCell(GRID_SIZE - 1,
+    #                                                                        cell[1] + 1) == current_player_color and
+    #                                                     stability_board[GRID_SIZE - 1][cell[1] + 1] == 1)
+    #                                                    or (game_state.getCell(GRID_SIZE - 1,
+    #                                                                           cell[1] - 1) == current_player_color and
+    #                                                        stability_board[GRID_SIZE - 1][cell[1] - 1] == 1)):
+    #                     max_stability += 1
+    #                     stability_board[cell[0]][cell[1]] = 1
+    #                 elif cell[1] == 0 and ((game_state.getCell(cell[0] + 1, 0) == current_player_color and
+    #                                         stability_board[cell[0] + 1][0] == 1)
+    #                                        or (game_state.getCell(cell[0] - 1, 0) == current_player_color and
+    #                                            stability_board[cell[0] - 1][0] == 1)):
+    #                     max_stability += 1
+    #                     stability_board[cell[0]][cell[1]] = 1
+    #                 elif cell[1] == GRID_SIZE - 1 and ((game_state.getCell(cell[0] + 1,
+    #                                                                        GRID_SIZE - 1) == current_player_color and
+    #                                                     stability_board[cell[0] + 1][GRID_SIZE - 1] == 1)
+    #                                                    or (game_state.getCell(cell[0] - 1,
+    #                                                                           GRID_SIZE - 1) == current_player_color and
+    #                                                        stability_board[cell[0] - 1][GRID_SIZE - 1] == 1)):
+    #                     max_stability += 1
+    #                     stability_board[cell[0]][cell[1]] = 1
+    #
+    #                 #
+    #                 # for direction in [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
+    #
+    #
+    #             else:
+    #
+    #
+    #     return None
