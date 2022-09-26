@@ -57,8 +57,14 @@ class myAgent(Agent):
             for a_tuple in state_with_actions:
                 child_state = a_tuple[0]
                 next_actions = self.rule.getLegalActions(child_state, self.rule.getNextAgentIndex())
+
+                max_mobility = len(actions)
+                min_mobility = len(next_actions)
+                mobility = (max_mobility - min_mobility)*100/(max_mobility+min_mobility)
+
                 # get the value of the action
                 value, _ = self.minimax(child_state, depth - 1, alpha, beta, False, next_actions)
+                value += 3*mobility
                 if value > max_value:
                     max_value = value
                     best_action = a_tuple[1]
@@ -76,7 +82,13 @@ class myAgent(Agent):
             for a_tuple in state_with_actions:
                 child_state = a_tuple[0]
                 next_actions = self.rule.getLegalActions(child_state, self.rule.getCurrentAgentIndex())
+
+                min_mobility = len(actions)
+                max_mobility = len(next_actions)
+                mobility = (max_mobility - min_mobility) * 100 / (max_mobility + min_mobility)
+
                 value, _ = self.minimax(child_state, depth - 1, alpha, beta, True, next_actions)
+                value += 3*mobility
                 if value < min_value:
                     min_value = value
                     worst_action = a_tuple[1]
@@ -278,19 +290,20 @@ class myAgent(Agent):
 
         return weights
 
-    def mobility_heuristic(self, game_state):
-        """
-        Component of heuristic function
-        Only use actual mobility - Actual mobility is the number of next moves a player has, given the current state of the game.
-        """
-        max_player_mobility = len(self.rule.getLegalActions(game_state, self.rule.getCurrentAgentIndex()))
-        min_player_mobility = len(self.rule.getLegalActions(game_state, self.rule.getNextAgentIndex()))
-        if (max_player_mobility + min_player_mobility) != 0:
-            h_value = (max_player_mobility - min_player_mobility) * 100 / (max_player_mobility + min_player_mobility)
-        else:
-            h_value = 0
-        return h_value
-    #
+    # def mobility_heuristic(self, game_state):
+    #     """
+    #     Component of heuristic function
+    #     Only use actual mobility - Actual mobility is the number of next moves a player has, given the current state of the game.
+    #     """
+    #     max_player_mobility = len(self.rule.getLegalActions(game_state, self.rule.getCurrentAgentIndex()))
+    #     min_player_mobility = len(self.rule.getLegalActions(game_state, self.rule.getNextAgentIndex()))
+    #     if (max_player_mobility + min_player_mobility) != 0:
+    #         h_value = (max_player_mobility - min_player_mobility) * 100 / (max_player_mobility + min_player_mobility)
+    #     else:
+    #         h_value = 0
+    #     return h_value
+
+
     # def stability_heuristic(self, game_state):
     #     """
     #     Weights are associated to each of the three categories( (i) stable, (ii) semi-stable and (iii) unstable.),
