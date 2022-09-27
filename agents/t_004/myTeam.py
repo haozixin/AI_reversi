@@ -33,7 +33,11 @@ class myAgent(Agent):
         if len(actions) == 1:
             return actions[0]
         else:
-            h_value, best_action = self.minimax(game_state, 3, -float("inf"), float("inf"), True, actions)
+            if len(actions)>7:
+                depth = 2
+            else:
+                depth = 3
+            h_value, best_action = self.minimax(game_state, depth, -float("inf"), float("inf"), True, actions)
         return best_action
 
         # return random.choice(actions)
@@ -64,7 +68,7 @@ class myAgent(Agent):
 
                 # get the value of the action
                 value, _ = self.minimax(child_state, depth - 1, alpha, beta, False, next_actions)
-                value += 3*mobility
+                value += 4*mobility
                 if value > max_value:
                     max_value = value
                     best_action = a_tuple[1]
@@ -88,7 +92,7 @@ class myAgent(Agent):
                 mobility = (max_mobility - min_mobility) * 100 / (max_mobility + min_mobility)
 
                 value, _ = self.minimax(child_state, depth - 1, alpha, beta, True, next_actions)
-                value += 3*mobility
+                value += 4*mobility
                 if value < min_value:
                     min_value = value
                     worst_action = a_tuple[1]
