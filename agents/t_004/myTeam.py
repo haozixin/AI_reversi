@@ -2,12 +2,21 @@ import copy
 import math
 import operator
 
-from Reversi.reversi_model import ReversiGameRule
 from Reversi.reversi_utils import Cell, GRID_SIZE, countScore
 from template import Agent
 
 EARLY_GAME_THRESHOLD = 28
 LATE_GAME_THRESHOLD = 57
+
+INITIAL_STATIC_WEIGHTS = [
+    [4, -3, 2, 2, 2, 2, -3, 4],
+    [-3, -4, -1, -1, -1, -1, -4, -3],
+    [2, -1, 1, 0, 0, 1, -1, 2],
+    [2, -1, 0, 1, 1, 0, -1, 2],
+    [2, -1, 0, 1, 1, 0, -1, 2],
+    [2, -1, 1, 0, 0, 1, -1, 2],
+    [-3, -4, -1, -1, -1, -1, -4, -3],
+    [4, -3, 2, 2, 2, 2, -3, 4]]
 
 
 class myAgent(Agent):
@@ -36,7 +45,8 @@ class myAgent(Agent):
         """
 
         if depth == 0 or gameEnds(game_state):
-            return self.evaluation(game_state, self.selectWeightSet(getTotalNumOfPieces(game_state)),
+            pieceCount, pieceWeights = self.calcPieceCountAndStaticWeights(game_state)
+            return self.evaluation(game_state, self.selectWeightSet(pieceCount), pieceWeights,
                                    mobility, mobility_op), None
 
         if currentPlayer == self.agent_id:  # It's our turn, we want to maximise
@@ -70,7 +80,7 @@ class myAgent(Agent):
 
             return minEval
 
-    def evaluation(self, game_state, weights, mobility, mobility_op):
+    def evaluation(self, game_state, weights, pieceWeights, mobility, mobility_op):
         print("Evaluation: ")
         print("Corners:", self.cornerHeuristic(game_state))
         print("Mobility", self.mobilityHeuristic(mobility, mobility_op))
@@ -80,7 +90,7 @@ class myAgent(Agent):
 
         return weights[0] * self.cornerHeuristic(game_state) \
                + weights[1] * self.pieceCountHeuristic(game_state) \
-               + weights[2] * self.mobilityHeuristic(mobility, mobility_op)
+               + weights[2] * self.mobilityHeuristic(mobility, mobility_op) + weights[3] * pieceWeights
 
     def mobilityHeuristic(self, mobility, mobility_op):
         if (mobility + mobility_op) != 0:
@@ -118,8 +128,7 @@ class myAgent(Agent):
             return 0
 
     def pieceCountHeuristic(self, game_state):
-        score = countScore(game_state.board, GRID_SIZE, game_state.agent_colors[self.agent_id])
-        opScore = countScore(game_state.board, GRID_SIZE, game_state.agent_colors[getNextAgentIndex(self.agent_id)])
+        score, opScore = countScore(game_state.board, GRID_SIZE, game_state.agent_colors[self.agent_id])
 
         return 100 * (score - opScore) / (score + opScore)  # denominator always != 0 because of the game initialisation
 
@@ -130,17 +139,17 @@ class myAgent(Agent):
         the number of pieces on the board.
         """
         weight_sets = [
-            [70, -20, 8],  # EARLY
-            [70, -5, 15],  # MIDDLE
-            [70, 20, 10],  # 57
-            [70, 35, 5],   # 58
-            [70, 50, 3],  # 59
-            [70, 60, 3],  # 60
-            [70, 65, 3],  # 61
-            [70, 70, 3],  # 62
-            [70, 100, 3],  # 63
-            [0, 100, 0]  # 64
-        ]
+            [70, -20, 8, 12],  # EARLY
+            [70, -5, 15, 1],  # MIDDLE
+            [70, 20, 10, 0],  # 57
+            [70, 35, 5, 0],   # 58
+            [70, 50, 3, 0],  # 59
+            [70, 60, 3, 0],  # 60
+            [70, 65, 3, 0],  # 61
+            [70, 70, 3, 0],  # 62
+            [70, 100, 3, 0],  # 63
+            [0, 100, 0, 0]  # 64
+        ]  # [corner heu, piece count, mobility]
 
         if curr_board_time < EARLY_GAME_THRESHOLD:
             return weight_sets[0]
@@ -162,6 +171,30 @@ class myAgent(Agent):
             return weight_sets[8]
         else:  # curr_board_time == 64
             return weight_sets[9]
+
+    def calcStaticWeights(self, game_state):
+        score = 0
+
+        for i in range(GRID_SIZE):
+            for j in range(GRID_SIZE):
+                if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
+                    score += INITIAL_STATIC_WEIGHTS[i][j]
+
+        return score
+
+    def calcPieceCountAndStaticWeights(self, game_state):
+        count = 0
+        score = 0
+
+        for i in range(GRID_SIZE):
+            for j in range(GRID_SIZE):
+                if game_state.board[i][j] != Cell.EMPTY:
+                    count += 1
+
+                if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
+                    score += INITIAL_STATIC_WEIGHTS[i][j]
+
+        return count, score
 
 
 def generateSuccessor(game_state, action, agent_id):
@@ -251,3 +284,16 @@ def getTotalNumOfPieces(game_state):
                 count += 1
 
     return count
+
+
+def countScoreForBoth(board, grid_size, player_color):
+    score = 0
+    opScore = 0
+    for i in range(grid_size):
+        for j in range(grid_size):
+            if board[i][j] == player_color:
+                score += 1
+            elif board[i][j] != Cell.EMPTY:
+                """Opponent color"""
+                opScore += 1
+    return score, opScore
