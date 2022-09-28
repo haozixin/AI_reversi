@@ -128,7 +128,7 @@ class myAgent(Agent):
             return 0
 
     def pieceCountHeuristic(self, game_state):
-        score, opScore = countScore(game_state.board, GRID_SIZE, game_state.agent_colors[self.agent_id])
+        score, opScore = countScoreForBoth(game_state.board, GRID_SIZE, game_state.agent_colors[self.agent_id])
 
         return 100 * (score - opScore) / (score + opScore)  # denominator always != 0 because of the game initialisation
 
@@ -296,4 +296,5 @@ def countScoreForBoth(board, grid_size, player_color):
             elif board[i][j] != Cell.EMPTY:
                 """Opponent color"""
                 opScore += 1
+
     return score, opScore
