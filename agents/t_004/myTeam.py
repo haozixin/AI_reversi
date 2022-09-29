@@ -9,16 +9,6 @@ EARLY_GAME_THRESHOLD = 28
 LATE_GAME_THRESHOLD = 57
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
-INITIAL_STATIC_WEIGHTS = [
-    [4, -3, 2, 2, 2, 2, -3, 4],
-    [-3, -4, -1, -1, -1, -1, -4, -3],
-    [2, -1, 1, 0, 0, 1, -1, 2],
-    [2, -1, 0, 1, 1, 0, -1, 2],
-    [2, -1, 0, 1, 1, 0, -1, 2],
-    [2, -1, 1, 0, 0, 1, -1, 2],
-    [-3, -4, -1, -1, -1, -1, -4, -3],
-    [4, -3, 2, 2, 2, 2, -3, 4]]
-
 
 class myAgent(Agent):
     def __init__(self, _id):
@@ -48,18 +38,17 @@ class myAgent(Agent):
         """
 
         if depth == 0 or gameEnds(game_state):
-            pieceCount, pieceWeightsHeuValue = self.calcPieceCountAndStaticWeights(game_state)
-            return self.evaluation(game_state, [30, 12, 4, 12],
+            return self.evaluation(game_state, self.selectWeightSet(getTotalNumOfPieces(game_state)),
                                    self.mobilityHeuristic(mobility, mobility_op)), None
 
         if currentPlayer == self.agent_id:  # It's our turn, we want to maximise
             maxEval = (-math.inf, None)
 
             for action in actions:
-                game_state = generateSuccessor(game_state, action, currentPlayer)
+                child_state = generateSuccessor(game_state, action, currentPlayer)
                 nextPlayer = getNextAgentIndex(currentPlayer)
-                eval = self.minimax(depth - 1, nextPlayer, game_state,
-                                    getLegalActions(game_state, nextPlayer), alpha, beta,
+                eval = self.minimax(depth - 1, nextPlayer, child_state,
+                                    getLegalActions(child_state, nextPlayer), alpha, beta,
                                     mobility + (0 if mobility_op == 0 else len(actions)), mobility_op)[0]
                 maxEval = max(maxEval, (eval, action), key=lambda x: x[0])
                 alpha = max(alpha, eval)
@@ -71,10 +60,10 @@ class myAgent(Agent):
             minEval = (math.inf, None)
 
             for action in actions:
-                game_state = generateSuccessor(game_state, action, currentPlayer)
+                child_state = generateSuccessor(game_state, action, currentPlayer)
                 nextPlayer = getNextAgentIndex(currentPlayer)
-                eval = self.minimax(depth - 1, nextPlayer, game_state,
-                                    getLegalActions(game_state, nextPlayer), alpha, beta,
+                eval = self.minimax(depth - 1, nextPlayer, child_state,
+                                    getLegalActions(child_state, nextPlayer), alpha, beta,
                                     mobility, mobility_op + len(actions))[0]
                 minEval = min(minEval, (eval, action), key=lambda x: x[0])
                 beta = min(beta, eval)
@@ -84,17 +73,9 @@ class myAgent(Agent):
             return minEval
 
     def evaluation(self, game_state, weights, mobilityHeuValue):
-        print("Evaluation Round: ", self.round)
-        print("Corners:", self.cornerHeuristic(game_state))
-        print("Mobility", mobilityHeuValue)
-        print("pieces:", self.pieceCountHeuristic(game_state))
-        s = self.stabilityHeuristic(game_state)
-        print("stability heuristic", s)
-        print("--------------------------------------------")
-
         return weights[0] * self.cornerHeuristic(game_state) \
                + weights[1] * self.pieceCountHeuristic(game_state) \
-               + weights[2] * mobilityHeuValue + weights[3] * s
+               + weights[2] * mobilityHeuValue + weights[3] * self.stabilityHeuristic(game_state)
 
     def mobilityHeuristic(self, mobility, mobility_op):
         if (mobility + mobility_op) != 0:
@@ -175,30 +156,6 @@ class myAgent(Agent):
             return weight_sets[8]
         else:  # curr_board_time == 64
             return weight_sets[9]
-
-    def calcStaticWeights(self, game_state):
-        score = 0
-
-        for i in range(GRID_SIZE):
-            for j in range(GRID_SIZE):
-                if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
-                    score += INITIAL_STATIC_WEIGHTS[i][j]
-
-        return score
-
-    def calcPieceCountAndStaticWeights(self, game_state):
-        count = 0
-        score = 0
-
-        for i in range(GRID_SIZE):
-            for j in range(GRID_SIZE):
-                if game_state.board[i][j] != Cell.EMPTY:
-                    count += 1
-
-                    if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
-                        score += INITIAL_STATIC_WEIGHTS[i][j]
-
-        return count, score
 
     def calcStability(self, game_state, player):
         def isStableHorizontal(disc, stabilityMatrix1):
@@ -387,7 +344,3 @@ def countScoreForBoth(board, grid_size, player_color):
                 opScore += 1
 
     return score, opScore
-
-if __name__ == '__main__':
-    a = [[False] * GRID_SIZE] * GRID_SIZE
-    print(a[0][0])
