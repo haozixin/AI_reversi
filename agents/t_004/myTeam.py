@@ -7,6 +7,7 @@ from template import Agent
 
 EARLY_GAME_THRESHOLD = 28
 LATE_GAME_THRESHOLD = 57
+DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
 INITIAL_STATIC_WEIGHTS = [
     [4, -3, 2, 2, 2, 2, -3, 4],
@@ -24,10 +25,12 @@ class myAgent(Agent):
         super().__init__(_id)
         self.depth = 3
         self.agent_id = _id
+        self.stabilityMatrix = None
+        self.round = 0
 
     def SelectAction(self, actions, game_state):
         actions = list(set(actions))
-
+        self.round += 1
         return self.minimax(self.depth, self.agent_id, game_state, actions, -math.inf, math.inf, 0, 0)[1]
 
     def minimax(self, depth, currentPlayer, game_state, actions, alpha, beta, mobility, mobility_op):
@@ -45,9 +48,9 @@ class myAgent(Agent):
         """
 
         if depth == 0 or gameEnds(game_state):
-            pieceCount, pieceWeights = self.calcPieceCountAndStaticWeights(game_state)
-            return self.evaluation(game_state, self.selectWeightSet(pieceCount), pieceWeights,
-                                   mobility, mobility_op), None
+            pieceCount, pieceWeightsHeuValue = self.calcPieceCountAndStaticWeights(game_state)
+            return self.evaluation(game_state, [30, 12, 4, 12],
+                                   self.mobilityHeuristic(mobility, mobility_op)), None
 
         if currentPlayer == self.agent_id:  # It's our turn, we want to maximise
             maxEval = (-math.inf, None)
@@ -80,17 +83,18 @@ class myAgent(Agent):
 
             return minEval
 
-    def evaluation(self, game_state, weights, pieceWeights, mobility, mobility_op):
-        print("Evaluation: ")
+    def evaluation(self, game_state, weights, mobilityHeuValue):
+        print("Evaluation Round: ", self.round)
         print("Corners:", self.cornerHeuristic(game_state))
-        print("Mobility", self.mobilityHeuristic(mobility, mobility_op))
-        print("Mobility us:", mobility)
-        print("Mobility op:", mobility_op)
+        print("Mobility", mobilityHeuValue)
         print("pieces:", self.pieceCountHeuristic(game_state))
+        s = self.stabilityHeuristic(game_state)
+        print("stability heuristic", s)
+        print("--------------------------------------------")
 
         return weights[0] * self.cornerHeuristic(game_state) \
                + weights[1] * self.pieceCountHeuristic(game_state) \
-               + weights[2] * self.mobilityHeuristic(mobility, mobility_op) + weights[3] * pieceWeights
+               + weights[2] * mobilityHeuValue + weights[3] * s
 
     def mobilityHeuristic(self, mobility, mobility_op):
         if (mobility + mobility_op) != 0:
@@ -139,16 +143,16 @@ class myAgent(Agent):
         the number of pieces on the board.
         """
         weight_sets = [
-            [70, -20, 8, 12],  # EARLY
-            [70, -5, 15, 1],  # MIDDLE
-            [70, 20, 10, 0],  # 57
-            [70, 35, 5, 0],   # 58
-            [70, 50, 3, 0],  # 59
-            [70, 60, 3, 0],  # 60
-            [70, 65, 3, 0],  # 61
-            [70, 70, 3, 0],  # 62
-            [70, 100, 3, 0],  # 63
-            [0, 100, 0, 0]  # 64
+            [100, -10, 10, 20],  # EARLY
+            [100, 5, 10, 15],  # MIDDLE
+            [100, 20, 10, 0],  # 57
+            [100, 35, 5, 0],   # 58
+            [100, 50, 3, 0],  # 59
+            [100, 60, 3, 0],  # 60
+            [100, 65, 3, 0],  # 61
+            [100, 70, 3, 0],  # 62
+            [100, 150, 0, 0],  # 63
+            [0, 150, 0, 0]  # 64
         ]  # [corner heu, piece count, mobility]
 
         if curr_board_time < EARLY_GAME_THRESHOLD:
@@ -191,10 +195,95 @@ class myAgent(Agent):
                 if game_state.board[i][j] != Cell.EMPTY:
                     count += 1
 
-                if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
-                    score += INITIAL_STATIC_WEIGHTS[i][j]
+                    if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
+                        score += INITIAL_STATIC_WEIGHTS[i][j]
 
         return count, score
+
+    def calcStability(self, game_state, player):
+        def isStableHorizontal(disc, stabilityMatrix1):
+            if disc[1] in [0, GRID_SIZE - 1]:
+                return True
+            elif stabilityMatrix1[disc[0]][disc[1] - 1] == 1 \
+                    or stabilityMatrix1[disc[0]][disc[1] + 1] == 1:
+                return True
+            else:
+                return False
+
+        def isStableVertical(disc, stabilityMatrix1):
+            if disc[0] in [0, GRID_SIZE - 1]:
+                return True
+            elif stabilityMatrix1[disc[0] - 1][disc[1]] == 1 \
+                    or stabilityMatrix1[disc[0] + 1][disc[1]] == 1:
+                return True
+            else:
+                return False
+
+        def isStableLeftDiagonal(disc, stabilityMatrix1):
+            if disc[0] == 0 or disc[1] == 0 or disc[0] == GRID_SIZE - 1 or disc[1] == GRID_SIZE - 1:
+                return True
+            elif stabilityMatrix1[disc[0] - 1][disc[1] - 1] or stabilityMatrix1[disc[0] + 1][disc[1] + 1]:
+                return True
+            else:
+                return False
+
+        def isStableRightDiagonal(disc, stabilityMatrix1):
+            if disc[0] == 0 or disc[1] == 0 or disc[0] == GRID_SIZE - 1 or disc[1] == GRID_SIZE - 1:
+                return True
+            elif stabilityMatrix1[disc[0] - 1][disc[1] + 1] or stabilityMatrix1[disc[0] + 1][disc[1] - 1]:
+                return True
+            else:
+                return False
+
+        stablePieces = 0
+        stabilityMatrix = [[False for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
+        processingList = []
+
+        for i in [0, GRID_SIZE - 1]:
+            for j in [0, GRID_SIZE - 1]:
+                if game_state.board[i][j] == game_state.agent_colors[player]:
+                    stabilityMatrix[i][j] = True
+                    processingList.append((i, j))
+                    stablePieces += 1
+
+        while len(processingList) != 0:
+            pos = processingList.pop(0)
+
+            for direction in DIRECTIONS:
+                x, y = tuple(map(operator.add, pos, direction))
+
+                if not validPos((x, y)):
+                    continue
+                if not game_state.board[x][y] == game_state.agent_colors[player]:
+                    continue
+                if stabilityMatrix[x][y]:
+                    continue
+
+                if isStableVertical((x, y), stabilityMatrix) \
+                        and isStableHorizontal((x, y), stabilityMatrix) \
+                        and isStableLeftDiagonal((x, y), stabilityMatrix) \
+                        and isStableRightDiagonal((x, y), stabilityMatrix):
+                    stablePieces += 1
+                    stabilityMatrix[x][y] = True
+                    processingList.append((x, y))
+
+        print("agent id:", player)
+        print(stabilityMatrix)
+
+        return stablePieces
+
+    def stabilityHeuristic(self, game_state):
+        stability = self.calcStability(game_state, self.agent_id)
+        stability_op = self.calcStability(game_state, getNextAgentIndex(self.agent_id))
+
+        if stability + stability_op != 0:
+            print("*****************")
+            print("stability VALUE: ", stability)
+            print("stability OP VALUE: ", stability_op)
+            print("*****************")
+            return 100 * (stability - stability_op) / (stability + stability_op)
+        else:
+            return 0
 
 
 def generateSuccessor(game_state, action, agent_id):
@@ -205,7 +294,7 @@ def generateSuccessor(game_state, action, agent_id):
         update_color = game_state.agent_colors[agent_id]
         next_state.board[action[0]][action[1]] = update_color
         # iterate over all 8 directions and check pieces that require updates
-        for direction in [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
+        for direction in DIRECTIONS:
             cur_pos = (action[0] + direction[0], action[1] + direction[1])
             update_list = list()
             flag = False
@@ -240,7 +329,7 @@ def getLegalActions(game_state, agent_id):
                 pos = (x, y)
                 appended = False
 
-                for direction in [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
+                for direction in DIRECTIONS:
                     if appended:
                         break
 
@@ -298,3 +387,7 @@ def countScoreForBoth(board, grid_size, player_color):
                 opScore += 1
 
     return score, opScore
+
+if __name__ == '__main__':
+    a = [[False] * GRID_SIZE] * GRID_SIZE
+    print(a[0][0])
