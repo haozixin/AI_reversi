@@ -32,8 +32,6 @@ class myAgent(Agent):
         calculation that doesn't improve the results to save time complexity.
 
         depth: The remaining depth of the search.
-        reversi_game_rule: Essentially the current state of the game with
-        the necessary functions (Refers to ReversiGameRule class).
         currentPlayer: The agent id of the current player.
         """
 
@@ -234,10 +232,6 @@ class myAgent(Agent):
         stability_op = self.calcStability(game_state, getNextAgentIndex(self.agent_id))
 
         if stability + stability_op != 0:
-            print("*****************")
-            print("stability VALUE: ", stability)
-            print("stability OP VALUE: ", stability_op)
-            print("*****************")
             return 100 * (stability - stability_op) / (stability + stability_op)
         else:
             return 0
