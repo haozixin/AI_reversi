@@ -13,7 +13,7 @@ DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -
 class myAgent(Agent):
     def __init__(self, _id):
         super().__init__(_id)
-        self.depth = 3
+        self.depth = 4
         self.agent_id = _id
         self.stabilityMatrix = None
         self.round = 0
