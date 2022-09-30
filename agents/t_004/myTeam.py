@@ -2,7 +2,7 @@ import copy
 import math
 import operator
 
-from Reversi.reversi_utils import Cell, GRID_SIZE, countScore
+from Reversi.reversi_utils import Cell, GRID_SIZE
 from template import Agent
 
 EARLY_GAME_THRESHOLD = 28
@@ -16,14 +16,12 @@ class myAgent(Agent):
         self.depth = 3
         self.agent_id = _id
         self.stabilityMatrix = None
-        self.round = 0
 
     def SelectAction(self, actions, game_state):
         actions = list(set(actions))
-        self.round += 1
-        return self.minimax(self.depth, self.agent_id, game_state, actions, -math.inf, math.inf, 0, 0)[1]
+        return self.minimax(self.depth, self.agent_id, game_state, actions, -math.inf, math.inf, 0)[1]
 
-    def minimax(self, depth, currentPlayer, game_state, actions, alpha, beta, mobility, mobility_op):
+    def minimax(self, depth, currentPlayer, game_state, actions, alpha, beta, mobilityHeuValue):
         """
         A function which maximises the heuristic hence the win rate of
         the agent and minimises the opponent agent. This function assumes
@@ -37,7 +35,7 @@ class myAgent(Agent):
 
         if depth == 0 or gameEnds(game_state):
             return self.evaluation(game_state, self.selectWeightSet(getTotalNumOfPieces(game_state)),
-                                   self.mobilityHeuristic(mobility, mobility_op)), None
+                                   mobilityHeuValue / self.depth), None
 
         if currentPlayer == self.agent_id:  # It's our turn, we want to maximise
             maxEval = (-math.inf, None)
@@ -45,9 +43,10 @@ class myAgent(Agent):
             for action in actions:
                 child_state = generateSuccessor(game_state, action, currentPlayer)
                 nextPlayer = getNextAgentIndex(currentPlayer)
+                nextPlayerActions = getLegalActions(child_state, nextPlayer)
                 eval = self.minimax(depth - 1, nextPlayer, child_state,
-                                    getLegalActions(child_state, nextPlayer), alpha, beta,
-                                    mobility + (0 if mobility_op == 0 else len(actions)), mobility_op)[0]
+                                    nextPlayerActions, alpha, beta,
+                                    mobilityHeuValue + self.mobilityHeuristic(len(actions), len(nextPlayerActions)))[0]
                 maxEval = max(maxEval, (eval, action), key=lambda x: x[0])
                 alpha = max(alpha, eval)
                 if beta <= alpha:
@@ -60,9 +59,10 @@ class myAgent(Agent):
             for action in actions:
                 child_state = generateSuccessor(game_state, action, currentPlayer)
                 nextPlayer = getNextAgentIndex(currentPlayer)
+                nextPlayerActions = getLegalActions(child_state, nextPlayer)
                 eval = self.minimax(depth - 1, nextPlayer, child_state,
-                                    getLegalActions(child_state, nextPlayer), alpha, beta,
-                                    mobility, mobility_op + len(actions))[0]
+                                    nextPlayerActions, alpha, beta,
+                                    mobilityHeuValue + self.mobilityHeuristic(len(nextPlayerActions), len(actions)))[0]
                 minEval = min(minEval, (eval, action), key=lambda x: x[0])
                 beta = min(beta, eval)
                 if beta <= alpha:
@@ -122,9 +122,9 @@ class myAgent(Agent):
         the number of pieces on the board.
         """
         weight_sets = [
-            [100, -10, 10, 20],  # EARLY
-            [100, 5, 10, 15],  # MIDDLE
-            [100, 20, 10, 0],  # 57
+            [100, -10, 5, 20],  # EARLY
+            [100, 5, 5, 15],  # MIDDLE
+            [100, 20, 5, 10],  # 57
             [100, 35, 5, 0],   # 58
             [100, 50, 3, 0],  # 59
             [100, 60, 3, 0],  # 60
@@ -221,9 +221,6 @@ class myAgent(Agent):
                     stablePieces += 1
                     stabilityMatrix[x][y] = True
                     processingList.append((x, y))
-
-        print("agent id:", player)
-        print(stabilityMatrix)
 
         return stablePieces
 
