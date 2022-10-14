@@ -49,7 +49,7 @@ def get_commit_time(repo:git.Repo):
     """
     Returns the commit time based on the TIMEZONE
 
-    :param repo: the repository 
+    :param repo: the repository
     :return: the commit time
     """
     commit = repo.commit()
@@ -59,14 +59,14 @@ def get_commit_time(repo:git.Repo):
 
 
 def gitCloneTeam(team_info, output_path):
-    
+
     token = None
     with open(GIT_TOKEN_PATH, "r") as f:
         token = f.read()
-    
+
 
     if not os.path.exists(output_path):
-        os.makedirs(output_path)    
+        os.makedirs(output_path)
     print(team_info)
     clone_url = f"https://{token}@{team_info['url'].replace('https://','')}"
     team_name = str(team_info['team_name'])
@@ -115,7 +115,7 @@ def gitCloneTeam(team_info, output_path):
                 f'Repo for team {team_name} cloned but unknown error when getting tag {branch}; should not happen. Stopping... {e}')
             team_info.update({'git':'failed'})
             team_info.update({'comments':f'Repo for team {team_name} cloned but unknown error when getting tag {branch}; should not happen. Stopping... {e}'})
-            # repo.close()  
+            # repo.close()
     else:
         team_info.update({'git':'succ'})
 
@@ -157,7 +157,7 @@ def loadAgent(matches,superQuiet = True):
             valid_game = False
             agents[i] = DummyAgent(i)
             matches['teams'][i].update({'load_agent': False})
-        
+
     return agents,valid_game
 
 
@@ -221,7 +221,7 @@ def run(options,msg):
             team_info.update(clone_result)
         matches['teams'].update({i:team_info})
     # Load game based on name
-    game_name = options.game 
+    game_name = options.game
     # matches.update({'game_name':game_name})
     GameRule = None
     TextDisplayer = None
@@ -251,7 +251,7 @@ def run(options,msg):
         random_seed = int(str(time.time()).replace('.', ''))
     else:
         random_seed = options.setRandomSeed
-    
+
     # make sure random seed is traceable
     random.seed(random_seed)
     seed_list = [random.randint(0,1e10) for _ in range(1000)]
@@ -266,7 +266,7 @@ def run(options,msg):
         replay_dir = options.replay
         replay = pickle.load(open(replay_dir,'rb'),encoding="bytes")
         GameReplayer(GameRule,replay,displayer).Run()
-    else: 
+    else:
         games_results = [tuple([0]*num_of_agents for i in range(5))]
         # results = {"succ":valid_game}
         for game_num in range(options.multipleGames):
@@ -298,7 +298,7 @@ def run(options,msg):
                     print("Following are the print info for loading:\n{}\n".format(msg))
                     print("\n-------------------------------------\n")
                     print("Following are the print info from the game:\n")
-                    if valid_game:          
+                    if valid_game:
                         replay = gr.Run()
                     else:
                         print("Invalid game. No game played.\n")
@@ -306,11 +306,11 @@ def run(options,msg):
                 print("Following are the print info for loading:\n{}\n".format(msg))
                 print("\n-------------------------------------\n")
                 print("Following are the print info from the game:\n")
-                if valid_game:      
+                if valid_game:
                     replay = gr.Run()
                 else:
                     print("Invalid game. No game played.\n")
-                    
+
             if valid_game:
                 # loading the current total
                 scores,totals,wins,ties,loses = games_results[len(games_results)-1]
@@ -321,15 +321,15 @@ def run(options,msg):
                 new_ties  = []
                 new_loses = []
                 game.update({f"scores":replay["scores"]})
-                
+
                 #Record scores.
                 for i in range(num_of_agents):
                     new_scores.append(replay["scores"][i])
-                    
+
                 max_score = max(new_scores)
 
 
-                        
+
 
                 #Order agent IDs and scores by their ranks this game. Ranks is a list of ranks (int) in player order.
                 #Ranks record ties, so if 2 or more agents achieve the same score, they also achieve the same rank.
@@ -338,7 +338,7 @@ def run(options,msg):
                 for agent_id,score in zip(ids,scores):
                     ranks.append((agent_id, scores.index(score) + 1))
                 ranks = [i[1] for i in sorted(ranks, key=lambda x : x[0])]
-                
+
                 #Update totals and wins (cumulative).
                 # num_first = 0
                 for i in range(num_of_agents):
@@ -361,7 +361,7 @@ def run(options,msg):
                     print("Result of game ({}/{}):".format(game_num+1, options.multipleGames))
                     for i in range(num_of_agents):
                         print("    {} earned {} points.".format(agent_names[i],new_scores[i]))
-    
+
                 games_results.append((new_scores,new_totals,new_wins, new_ties,new_loses))
 
                 if options.saveGameRecord:
@@ -378,7 +378,7 @@ def run(options,msg):
         print(matches)
         if valid_game:
             scores,totals,wins,ties,loses = games_results[len(games_results)-1]
-            
+
             avgs = []
             win_rates = []
             for i in range(num_of_agents):
@@ -417,23 +417,23 @@ def loadParameter():
     """
     parser = OptionParser(usageStr)
     # parser.add_option('-r','--red', help='Red team agent file', default=DEFAULT_AGENT)
-    # parser.add_option('-b','--blue', help='Blue team agent file', default=DEFAULT_AGENT) 
-    parser.add_option('-a','--agents', help='A list of the agents, etc, agents.myteam.player', default="agents.generic.random,agents.generic.random") 
+    # parser.add_option('-b','--blue', help='Blue team agent file', default=DEFAULT_AGENT)
+    parser.add_option('-a','--agents', help='A list of the agents, etc, agents.myteam.player', default="agents.t_004.myTeam,agents.generic.random")
 
     # parser.add_option('--redName', help='Red agent name', default='Red')
-    # parser.add_option('--blueName', help='Blue agent name', default='Blue') 
-    parser.add_option('--agent_names', help='A list of agent names', default="random0,random1") 
+    # parser.add_option('--blueName', help='Blue agent name', default='Blue')
+    parser.add_option('--agent_names', help='A list of agent names', default="random0,random1")
 
     # whether load team from cloud
     parser.add_option('--cloud', action='store_true', help='Display output as text only (default: False)', default=False)
 
-    # parser.add_option('--redURL', help='Red team repo URL', default=None) 
-    # parser.add_option('--redCommit', help='Red team commit id', default=None) 
-    # parser.add_option('--blueURL', help='Blue team repo URL', default=None) 
-    # parser.add_option('--blueCommit', help='Blue team commit id', default=None) 
+    # parser.add_option('--redURL', help='Red team repo URL', default=None)
+    # parser.add_option('--redCommit', help='Red team commit id', default=None)
+    # parser.add_option('--blueURL', help='Blue team repo URL', default=None)
+    # parser.add_option('--blueCommit', help='Blue team commit id', default=None)
 
     parser.add_option('--agent_urls', help='A list of urls', default="")
-    parser.add_option('--agent_commit_ids', help='A list of commit ids', default="") 
+    parser.add_option('--agent_commit_ids', help='A list of commit ids', default="")
 
     parser.add_option('-n', '--num_of_agents', type='int',help='The number of agents in this game', default=2)
 
@@ -444,7 +444,7 @@ def loadParameter():
     parser.add_option('-w', '--warningTimeLimit', type='float',help='Time limit for a warning of one move in seconds (default: 1)', default=1.0)
     parser.add_option('--startRoundWarningTimeLimit', type='float',help='Time limit for a warning of initialization for each round in seconds (default: 5)', default=5.0)
     parser.add_option('--numOfWarnings', type='int',help='Num of warnings a team can get before fail (default: 3)', default=3)
-    parser.add_option('-m', '--multipleGames', type='int',help='Run multiple games in a roll', default=1)
+    parser.add_option('-m', '--multipleGames', type='int',help='Run multiple games in a roll', default=100)
     parser.add_option('--setRandomSeed', type='int',help='Set the random seed, otherwise it will be completely random (default: 90054)', default=90054)
     parser.add_option('-s','--saveGameRecord', action='store_true', help='Writes game histories to a file (named by teams\' names and the time they were played) (default: False)', default=False)
     parser.add_option('-o','--output', help='output directory for replay and log (default: output)',default='output')
@@ -453,7 +453,7 @@ def loadParameter():
     parser.add_option('--delay', type='float', help='Delay action in a play or replay by input (float) seconds (default 0.1)', default=0.1)
     parser.add_option('-p','--print', action='store_true', help='Print all the output in terminal when playing games, will diable \'-l\' automatically. (default: False)', default=False)
     parser.add_option('--half-scale', action='store_true', help='Display game at half-scale (default is 1920x1080)', default=False)
-    parser.add_option('--interactive', action='store_true', help="Gives the user control over the Citrine agent's actions", default=False)   
+    parser.add_option('--interactive', action='store_true', help="Gives the user control over the Citrine agent's actions", default=False)
 
     options, otherjunk = parser.parse_args(sys.argv[1:] )
     assert len(otherjunk) == 0, "Unrecognized options: " + str(otherjunk)

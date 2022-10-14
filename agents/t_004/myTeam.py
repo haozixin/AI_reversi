@@ -10,14 +10,8 @@ class myAgent(Agent):
     def __init__(self,_id):
         super().__init__(_id)
 
-
-    
     def SelectAction(self,actions,game_state):
         # get index of set
-
-
-
-
         qfunction = QTable()
         mdp = Reversi_mdp(actions, game_state)
         ucb = UpperConfidenceBounds()
