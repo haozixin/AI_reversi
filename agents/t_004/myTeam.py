@@ -7,11 +7,9 @@ import random
 
 
 class myAgent(Agent):
-    myAgent_id = -1
     def __init__(self,_id):
         super().__init__(_id)
-        myAgent.myAgent_id = _id
-    
+
     def SelectAction(self,actions,game_state):
         # get index of set
 

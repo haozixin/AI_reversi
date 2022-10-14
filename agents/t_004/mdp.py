@@ -7,6 +7,8 @@ from Reversi.reversi_utils import GRID_SIZE, Cell
 # from agents.t_004.myTeam import *
 
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
+
 class MDP:
     """
     Abstract class
@@ -55,6 +57,7 @@ class MDP:
         pass
         # return (next_state, reward)
 
+
 class Reversi_mdp(MDP):
     """
     MDP Model
@@ -73,13 +76,8 @@ class Reversi_mdp(MDP):
         # TODO: Implement this method
         return getLegalActions(state, agent_id)
 
-    def is_terminal(self, state):
-        # state is game_state
-        if getLegalActions(state, 0) == ["Pass"] \
-                and getLegalActions(state, 1) == ["Pass"]:
-            return True
-        else:
-            return False
+    def is_terminal(self, game_state):
+        return gameEnds(game_state)
 
     def get_transitions(self, state, action):
         pass
@@ -144,17 +142,10 @@ def generateSuccessor(game_state, action, agent_id):
                     next_state.board[i][j] = update_color
         return next_state
 
-
-def gameEnds(game_state):
-    if getLegalActions(game_state, 0) == ["Pass"] \
-            and getLegalActions(game_state, 1) == ["Pass"]:
-        return True
-    else:
-        return False
-
 def validPos(pos):
     x, y = pos
     return 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE
+
 
 def getLegalActions(game_state, agent_id):
     actions = []
@@ -183,4 +174,47 @@ def getLegalActions(game_state, agent_id):
 
     if len(actions) == 0:
         actions.append("Pass")
+
     return actions
+
+
+def getTotalNumOfPieces(game_state):
+    """
+    Returns the total number of
+    pieces on the board in the current
+    game state.
+    """
+    count = 0
+
+    for i in range(GRID_SIZE):
+        for j in range(GRID_SIZE):
+            if game_state.board[i][j] != Cell.EMPTY:
+                count += 1
+
+    return count
+
+
+def getNextAgentIndex(agent_id):
+    return (agent_id + 1) % 2
+
+
+def gameEnds(game_state):
+    if getLegalActions(game_state, 0) == ["Pass"] \
+            and getLegalActions(game_state, 1) == ["Pass"]:
+        return True
+    else:
+        return False
+
+
+def countScoreForBoth(board, grid_size, player_color):
+    score = 0
+    opScore = 0
+    for i in range(grid_size):
+        for j in range(grid_size):
+            if board[i][j] == player_color:
+                score += 1
+            elif board[i][j] != Cell.EMPTY:
+                """Opponent color"""
+                opScore += 1
+
+    return score, opScore
