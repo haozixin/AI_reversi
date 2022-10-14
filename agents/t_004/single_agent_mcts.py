@@ -127,5 +127,5 @@ class SingleAgentMCTS(MCTS):
 
         player_id = 0
         return SingleAgentNode(
-            self.mdp, None, self.mdp.get_initial_state(), self.qfunction, self.bandit, player_id=player_id
+            self.mdp, None, self.mdp.get_initial_state(), self.qfunction, self.bandit, player_id=player_id, root_node=True
         )
