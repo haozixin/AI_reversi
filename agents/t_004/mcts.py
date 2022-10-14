@@ -1,10 +1,9 @@
-
-
 import utils
 import math
 import time
 import random
 from collections import defaultdict
+
 
 class Node:
 
@@ -33,37 +32,27 @@ class Node:
         # The action that generated this node
         self.action = action
 
-
-
     """ Select a node that is not fully expanded """
-
-
     def select(self):
         utils.raiseNotDefined()
         pass
 
     """ Expand a node if it is not a terminal node """
-
-
     def expand(self):
         utils.raiseNotDefined()
         pass
 
     """ Backpropogate the reward back to the parent node """
-
-
     def back_propagate(self, reward, child):
         utils.raiseNotDefined()
         pass
 
     """ Return the value of this node """
-
     def get_value(self):
         utils.raiseNotDefined()
         pass
 
     """ Get the number of visits to this state """
-
     def get_visits(self):
         return Node.visits[self.state]
 
@@ -80,7 +69,7 @@ class MCTS:
     # core of the MCTS algorithm
     def mcts(self, timeout=0.5, root_node=None):
         if root_node is None:
-            root_node = self.create_root_node()
+            root_node = self.create_root_node(self.mdp.get_agent_id())
 
         start_time = time.time()
         current_time = time.time()
@@ -98,18 +87,16 @@ class MCTS:
         return root_node
 
     """ Create a root node representing an initial state """
-    def create_root_node(self):
+    def create_root_node(self, agent_id):
         utils.raiseNotDefined()
         pass
 
-
-    """ Choose a random action. Heustics can be used here to improve simulations. """
+    """ Choose a random action. Heuristics can be used here to improve simulations. """
     # TODO: Implement a better action selection heuristic
     def choose(self, state, player_id):
         return random.choice(self.mdp.get_actions(state, player_id))
 
     """ Simulate until a terminal state """
-
     def simulate(self, node):
         state = node.state
         cumulative_reward = 0.0

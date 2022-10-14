@@ -5,17 +5,16 @@ from agents.t_004.mcts import Node, MCTS
 
 class SingleAgentNode(Node):
     def __init__(
-        self,
-        mdp,
-        parent,
-        state,
-        qfunction,
-        bandit,
-        player_id,
-        reward=0.0,
-        action=None,
-        root_node=False,
-
+            self,
+            mdp,
+            parent,
+            state,
+            qfunction,
+            bandit,
+            agent_id,
+            reward=0.0,
+            action=None,
+            root_node=False,
 
     ):
         super().__init__(mdp, parent, state, qfunction, bandit, reward, action)
@@ -25,16 +24,17 @@ class SingleAgentNode(Node):
         self.children = {}
 
         # record the player id, who is going to play at this state
-        self.player_id = player_id
+        self.agent_id = agent_id
 
         # used when generating children
-        self.next_player_id = 1 - player_id
+        self.next_agent_id = 1 - agent_id
         self.is_terminal = mdp.is_terminal(state)
         self.is_root = root_node
+
     """ Return true if and only if all child actions have been expanded """
 
     def is_fully_expanded(self):
-        valid_actions = self.mdp.get_actions(self.state, self.player_id)
+        valid_actions = self.mdp.get_actions(self.state, self.agent_id)
         if len(valid_actions) == len(self.children):
             return True
         else:
@@ -58,7 +58,7 @@ class SingleAgentNode(Node):
             if self.is_root:
                 actions = self.mdp.actions
             else:
-                actions = self.mdp.get_actions(self.state, self.player_id) - self.children.keys()
+                actions = self.mdp.get_actions(self.state, self.agent_id) - self.children.keys()
             action = random.choice(list(actions))
             # put new action into children
             self.children[action] = []
@@ -75,11 +75,11 @@ class SingleAgentNode(Node):
 
         q_value = self.qfunction.get_q_value(self.state, action)
         delta = (1 / (Node.visits[(self.state, action)])) * (
-            reward - self.qfunction.get_q_value(self.state, action)
+                reward - self.qfunction.get_q_value(self.state, action)
         )
         self.qfunction.update(self.state, action, delta)
 
-        if self.parent != None:
+        if self.parent:  # if parent not None
             self.parent.back_propagate(self.reward + reward, self)
 
     """ Simulate the outcome of an action, and return the child node """
@@ -90,7 +90,7 @@ class SingleAgentNode(Node):
         Choose one outcome s' according to the transition probabilities
         """
         # Choose one outcome based on transition probabilities
-        (next_state, reward) = self.mdp.execute(self.state, action, self.player_id)
+        (next_state, reward) = self.mdp.execute(self.state, action, self.agent_id)
 
         # Find the corresponding state and return if this already exists
         for (child, _) in self.children[action]:
@@ -99,12 +99,11 @@ class SingleAgentNode(Node):
 
         # This outcome has not occured from this state-action pair previously
         new_child = SingleAgentNode(
-            self.mdp, self, next_state, self.qfunction, self.bandit, self.next_player_id, reward, action,
+            self.mdp, self, next_state, self.qfunction, self.bandit, self.next_agent_id, reward, action,
         )
 
         self.children[action].append((new_child, 1.0))
         return new_child
-
 
         # # Find the probability of this outcome (only possible for model-based) for printing the search tree
         # probability = 0.0
@@ -113,19 +112,15 @@ class SingleAgentNode(Node):
         #         self.children[action] += [(new_child, probability)]
         #         return new_child
 
-
     def get_value(self):
         (_, max_q_value) = self.qfunction.get_max_q(
-            self.state, self.mdp.get_actions(self.state, self.player_id)
+            self.state, self.mdp.get_actions(self.state, self.agent_id)
         )
         return max_q_value
 
 
 class SingleAgentMCTS(MCTS):
-
-    def create_root_node(self):
-
-        player_id = 0
+    def create_root_node(self, agent_id):
         return SingleAgentNode(
-            self.mdp, None, self.mdp.get_initial_state(), self.qfunction, self.bandit, player_id=player_id, root_node=True
-        )
+            self.mdp, None, self.mdp.get_initial_state(), self.qfunction, self.bandit, agent_id=agent_id,
+            root_node=True)

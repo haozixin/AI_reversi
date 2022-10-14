@@ -1,12 +1,11 @@
 import copy
 import operator
-
+from abc import abstractmethod
 from Reversi.reversi_utils import GRID_SIZE, Cell
-
-
-# from agents.t_004.myTeam import *
+from collections import defaultdict
 
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+DISCOUNT_FACTOR = 0.9
 
 
 class MDP:
@@ -14,17 +13,15 @@ class MDP:
     Abstract class
     """
 
-    """ Return all states of this MDP """
-    def get_states(self):
-        pass
-
     """ Return all actions with non-zero probability from this state """
-    def get_actions(self, state, player):
+    @abstractmethod
+    def get_actions(self, state):
         pass
 
     """ Return all non-zero probability transitions for this action
         from this state, as a list of (state, probability) pairs
     """
+    @abstractmethod
     def get_transitions(self, state, action):
         # TODO: Implement this method
         pass
@@ -32,90 +29,66 @@ class MDP:
     """ Return the reward for transitioning from state to
         nextState via action
     """
+    @abstractmethod
     def get_reward(self, state, action, next_state):
         pass
 
     """ Return true if and only if state is a terminal state of this MDP """
+    @abstractmethod
     def is_terminal(self, state):
         # TODO: Implement this method
         pass
 
     """ Return the discount factor for this MDP """
+    @abstractmethod
     def get_discount_factor(self):
         pass
 
     """ Return the initial state of this MDP """
+    @abstractmethod
     def get_initial_state(self):
         # TODO: Implement this method
         pass
 
-    """ Return all goal states of this MDP """
-    def get_goal_states(self):
+    """ Return the initial state of this MDP """
+    @abstractmethod
+    def get_agent_id(self):
+        # TODO: Implement this method
         pass
 
-    def execute(self, state, action, player):
-        pass
-        # return (next_state, reward)
 
-
-class Reversi_mdp(MDP):
-    """
-    MDP Model
-    """
-    def __init__(self, actions, game_state):
+class Reversi_MDP(MDP):
+    def __init__(self, agent_id, game_state, actions):
+        self.agent_id = agent_id
         self.actions = actions
         self.game_state = game_state
 
-    def get_root_actions(self):
-        dic = {}
-        for action in self.actions:
-            dic[action] = []
-        return dic
-
-    def get_actions(self, state, agent_id):
-        # TODO: Implement this method
-        return getLegalActions(state, agent_id)
+    def get_actions(self, game_state):
+        return getLegalActions(game_state, self.agent_id)
 
     def is_terminal(self, game_state):
         return gameEnds(game_state)
 
-    def get_transitions(self, state, action):
+    def get_reward(self, game_state, action, next_state):
+        pass
+
+    def get_transitions(self, game_state, action):
         pass
 
     def get_initial_state(self):
         return self.game_state
 
-    def execute(self, state, action, agent_id):
-        """
-        return (next_state, reward)
-        """
-        next_state = generateSuccessor(state, action, agent_id)
-
-        # reward is 1 if we win, -1 if we lose, 0 otherwise
-        reward = getReward(state)
-        return (next_state, reward)
+    def execute(self, game_state, action, agent_id):
+        # TODO
+        pass
 
     def get_discount_factor(self):
-        return 0.9
+        return DISCOUNT_FACTOR
 
-def getReward(state):
-    game_is_end = gameEnds(state)
-    if game_is_end:
-        player_color = state.agent_colors[0]
-        board = state.board
-        score = 0
-        for i in range(GRID_SIZE):
-            for j in range(GRID_SIZE):
-                if board[i][j] == player_color:
-                    score += 1
-                if score > 32:
-                    return 1
-        # we lose the game
-        return -1
-    else:
-        # if the game is not end, return 0
-        #TODO: maybe we could calculate stability as reward here
-        return 0
+    def get_agent_id(self):
+        # TODO: Implement this method
+        return self.agent_id
+
 
 def generateSuccessor(game_state, action, agent_id):
     if action == "Pass":
@@ -141,6 +114,7 @@ def generateSuccessor(game_state, action, agent_id):
                 for i, j in update_list:
                     next_state.board[i][j] = update_color
         return next_state
+
 
 def validPos(pos):
     x, y = pos
@@ -194,10 +168,6 @@ def getTotalNumOfPieces(game_state):
     return count
 
 
-def getNextAgentIndex(agent_id):
-    return (agent_id + 1) % 2
-
-
 def gameEnds(game_state):
     if getLegalActions(game_state, 0) == ["Pass"] \
             and getLegalActions(game_state, 1) == ["Pass"]:
@@ -218,3 +188,7 @@ def countScoreForBoth(board, grid_size, player_color):
                 opScore += 1
 
     return score, opScore
+
+
+def areSameStates(game_state1, game_state2):
+    return game_state1.board == game_state2.board

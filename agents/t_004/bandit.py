@@ -2,17 +2,16 @@ import math
 import random
 
 
-class MultiArmedBandit():
+class MultiArmedBandit:
 
     """ Select an action for this state given from a list given a Q-function """
-
     def select(self, state, actions, qfunction):
         pass
 
     """ Reset a multi-armed bandit to its initial configuration """
-
     def reset(self):
         self.__init__()
+
 
 class EpsilonGreedy(MultiArmedBandit):
     def __init__(self, epsilon=0.1):
@@ -28,6 +27,7 @@ class EpsilonGreedy(MultiArmedBandit):
         (arg_max_q, _) = qfunction.get_max_q(state, actions)
         return arg_max_q
 
+
 class EpsilonDecreasing(MultiArmedBandit):
     def __init__(self, epsilon=0.2, alpha=0.999):
         self.epsilon_greedy_bandit = EpsilonGreedy(epsilon)
@@ -41,6 +41,7 @@ class EpsilonDecreasing(MultiArmedBandit):
         result = self.epsilon_greedy_bandit.select(state, actions, qfunction)
         self.epsilon_greedy_bandit.epsilon *= self.alpha
         return result
+
 
 class Softmax(MultiArmedBandit):
     def __init__(self, tau=1.0):
@@ -68,6 +69,7 @@ class Softmax(MultiArmedBandit):
             cumulative_probability += probability
 
         return result
+
 
 class UpperConfidenceBounds(MultiArmedBandit):
     def __init__(self):
@@ -104,4 +106,6 @@ class UpperConfidenceBounds(MultiArmedBandit):
         result = random.choice(max_actions)
         self.times_selected[result] = self.times_selected[result] + 1
         self.total += 1
+
         return result
+
