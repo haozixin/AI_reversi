@@ -76,6 +76,9 @@ class UpperConfidenceBounds(MultiArmedBandit):
         self.times_selected = {}
 
     def select(self, state, actions, qfunction):
+        """
+        return an action based on the UCB1 algorithm
+        """
 
         # First execute each action one time
         for action in actions:

@@ -33,6 +33,8 @@ class Node:
         # The action that generated this node
         self.action = action
 
+
+
     """ Select a node that is not fully expanded """
 
 
@@ -57,10 +59,8 @@ class Node:
     """ Return the value of this node """
 
     def get_value(self):
-        (_, max_q_value) = self.qfunction.get_max_q(
-            self.state, self.mdp.get_actions(self.state)
-        )
-        return max_q_value
+        utils.raiseNotDefined()
+        pass
 
     """ Get the number of visits to this state """
 
@@ -77,8 +77,8 @@ class MCTS:
     """
     Execute the MCTS algorithm from the initial state given, with timeout in seconds
     """
-
-    def mcts(self, timeout=0.97, root_node=None):
+    # core of the MCTS algorithm
+    def mcts(self, timeout=0.5, root_node=None):
         if root_node is None:
             root_node = self.create_root_node()
 
@@ -86,7 +86,7 @@ class MCTS:
         current_time = time.time()
         while current_time < start_time + timeout:
 
-            # Find a state node to expand
+            # Find a state node to expand, (root_node is the object of SingleAgentNode)
             selected_node = root_node.select()
             if not self.mdp.is_terminal(selected_node.state):
                 child = selected_node.expand()
@@ -99,15 +99,14 @@ class MCTS:
 
     """ Create a root node representing an initial state """
     def create_root_node(self):
-        # TODO: Implement this method
         utils.raiseNotDefined()
         pass
 
 
     """ Choose a random action. Heustics can be used here to improve simulations. """
     # TODO: Implement a better action selection heuristic
-    def choose(self, state):
-        return random.choice(self.mdp.get_actions(state))
+    def choose(self, state, player_id):
+        return random.choice(self.mdp.get_actions(state, player_id))
 
     """ Simulate until a terminal state """
 
@@ -117,10 +116,10 @@ class MCTS:
         depth = 0
         while not self.mdp.is_terminal(state):
             # Choose an action to execute
-            action = self.choose(state)
+            action = self.choose(state, node.player_id)
 
             # Execute the action
-            (next_state, reward) = self.mdp.execute(state, action)
+            (next_state, reward) = self.mdp.execute(state, action, node.player_id)
 
             # Discount the reward
             cumulative_reward += pow(self.mdp.get_discount_factor(), depth) * reward
