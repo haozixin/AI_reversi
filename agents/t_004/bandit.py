@@ -19,7 +19,7 @@ class ModifiedUpperConfidenceBounds(MultiArmedBandit):
     fit the dedicated MCTS algorithm.
     """
 
-    def select(self, state, actions, qfunction, node_visits, C=0.5):
+    def select(self, state, actions, qfunction, node_visits, C=1):
         """
         return an action based on the UCB1 algorithm.
 

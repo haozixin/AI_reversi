@@ -87,7 +87,6 @@ class Reversi_MDP(MDP):
         return self.game_state
 
     def execute(self, game_state, action, agent_id):
-        """Currently returns the resulting state randomly"""
         next_state = generateSuccessor(game_state, action, agent_id)
         return next_state, self.get_reward(game_state, action, next_state)
 
