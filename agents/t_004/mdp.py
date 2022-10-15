@@ -3,6 +3,7 @@ import operator
 from abc import abstractmethod
 from Reversi.reversi_utils import GRID_SIZE, Cell
 from collections import defaultdict
+import random
 
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 DISCOUNT_FACTOR = 0.9
@@ -15,16 +16,15 @@ class MDP:
 
     """ Return all actions with non-zero probability from this state """
     @abstractmethod
-    def get_actions(self, state):
+    def get_actions(self, state, agent_id):
         pass
 
-    """ Return all non-zero probability transitions for this action
-        from this state, as a list of (state, probability) pairs
-    """
-    @abstractmethod
-    def get_transitions(self, state, action):
-        # TODO: Implement this method
-        pass
+    # """ Return all non-zero probability transitions for this action
+    #     from this state, as a list of (state, probability) pairs
+    # """
+    # @abstractmethod
+    # def get_transitions(self, state, action):
+    #     pass
 
     """ Return the reward for transitioning from state to
         nextState via action
@@ -50,44 +50,42 @@ class MDP:
         # TODO: Implement this method
         pass
 
-    """ Return the initial state of this MDP """
-    @abstractmethod
-    def get_agent_id(self):
-        # TODO: Implement this method
-        pass
-
 
 class Reversi_MDP(MDP):
     def __init__(self, agent_id, game_state, actions):
-        self.agent_id = agent_id
+        self.init_agent_id = agent_id
         self.actions = actions
         self.game_state = game_state
 
-    def get_actions(self, game_state):
-        return getLegalActions(game_state, self.agent_id)
+    def get_actions(self, game_state, agent_id):
+        return getLegalActions(game_state, agent_id)
 
     def is_terminal(self, game_state):
         return gameEnds(game_state)
 
     def get_reward(self, game_state, action, next_state):
-        pass
+        if gameEnds(next_state):
+            score, opScore = countScoreForBoth(next_state.board, GRID_SIZE, next_state.agent_colors[self.init_agent_id])
 
-    def get_transitions(self, game_state, action):
-        pass
+            if score > opScore:
+                return 1
+            elif score == opScore:
+                return 0.5
+            else:
+                return 0.0
+        else:
+            return 0.0
 
     def get_initial_state(self):
         return self.game_state
 
     def execute(self, game_state, action, agent_id):
-        # TODO
-        pass
+        """Currently returns the resulting state randomly"""
+        next_state = generateSuccessor(game_state, action, agent_id)
+        return next_state, self.get_reward(game_state, action, next_state)
 
     def get_discount_factor(self):
         return DISCOUNT_FACTOR
-
-    def get_agent_id(self):
-        # TODO: Implement this method
-        return self.agent_id
 
 
 def generateSuccessor(game_state, action, agent_id):
@@ -188,7 +186,3 @@ def countScoreForBoth(board, grid_size, player_color):
                 opScore += 1
 
     return score, opScore
-
-
-def areSameStates(game_state1, game_state2):
-    return game_state1.board == game_state2.board

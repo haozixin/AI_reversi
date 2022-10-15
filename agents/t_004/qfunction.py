@@ -6,7 +6,6 @@ class QFunction:
         utils.raiseNotDefined()
         pass
 
-
     def get_q_value(self, state, action):
         utils.raiseNotDefined()
         pass

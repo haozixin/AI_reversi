@@ -19,7 +19,7 @@ class ReversiState(GameState):
     # initialise the board with 2 black and 2 white pieces
     def _initialiseBoard(self):
         half = int(self.grid_size/2)
-        print(half)
+        # print(half)
         self.next_player_color = Cell.BLACK
         self.board[half-1][half-1] = Cell.WHITE
         self.board[half][half-1] = Cell.BLACK
@@ -36,12 +36,10 @@ class ReversiGameRule(GameRule):
 
     def __init__(self,num_of_agent):
         super().__init__(num_of_agent)
-        self.private_information = None #Reversi is a perfect-information game.
-
+        self.private_information = None  # Reversi is a perfect-information game.
 
     def initialGameState(self):
         self.agent_colors = {}
-        
         self.current_agent_index = random.choice(range(self.num_of_agent))
         self.agent_colors.update({self.current_agent_index:Cell.BLACK,self.getNextAgentIndex():Cell.WHITE})
         self.validPos = self.validPos()

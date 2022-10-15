@@ -1,8 +1,5 @@
 from collections import defaultdict
-
 from agents.t_004.qfunction import QFunction
-
-
 
 
 class QTable(QFunction):

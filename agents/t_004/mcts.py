@@ -6,10 +6,6 @@ from collections import defaultdict
 
 
 class Node:
-
-    # Record a unique node id to distinguish duplicated states
-    next_node_id = 0
-
     # Records the number of times states have been visited
     visits = defaultdict(lambda: 0)
 
@@ -17,8 +13,6 @@ class Node:
         self.mdp = mdp
         self.parent = parent
         self.state = state
-        self.id = Node.next_node_id
-        Node.next_node_id += 1
 
         # The Q function used to store state-action values
         self.qfunction = qfunction
@@ -69,13 +63,12 @@ class MCTS:
     # core of the MCTS algorithm
     def mcts(self, timeout=0.5, root_node=None):
         if root_node is None:
-            root_node = self.create_root_node(self.mdp.get_agent_id())
+            root_node = self.create_root_node()
 
         start_time = time.time()
         current_time = time.time()
         while current_time < start_time + timeout:
-
-            # Find a state node to expand, (root_node is the object of SingleAgentNode)
+            # Find a state node to expand
             selected_node = root_node.select()
             if not self.mdp.is_terminal(selected_node.state):
                 child = selected_node.expand()
@@ -87,14 +80,14 @@ class MCTS:
         return root_node
 
     """ Create a root node representing an initial state """
-    def create_root_node(self, agent_id):
+    def create_root_node(self):
         utils.raiseNotDefined()
         pass
 
-    """ Choose a random action. Heuristics can be used here to improve simulations. """
+    """ Choose a random action. Heuristics can be used here to improve simulations."""
     # TODO: Implement a better action selection heuristic
-    def choose(self, state, player_id):
-        return random.choice(self.mdp.get_actions(state, player_id))
+    def choose(self, state):
+        return random.choice(self.mdp.get_actions(state))
 
     """ Simulate until a terminal state """
     def simulate(self, node):
@@ -103,10 +96,10 @@ class MCTS:
         depth = 0
         while not self.mdp.is_terminal(state):
             # Choose an action to execute
-            action = self.choose(state, node.player_id)
+            action = self.choose(state)
 
             # Execute the action
-            (next_state, reward) = self.mdp.execute(state, action, node.player_id)
+            (next_state, reward) = self.mdp.execute(state, action, node.agent_id)
 
             # Discount the reward
             cumulative_reward += pow(self.mdp.get_discount_factor(), depth) * reward
