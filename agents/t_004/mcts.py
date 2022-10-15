@@ -3,6 +3,9 @@ import math
 import time
 import random
 from collections import defaultdict
+from Reversi.reversi_utils import GRID_SIZE
+
+TIMEOUT = 0.9
 
 
 class Node:
@@ -61,7 +64,7 @@ class MCTS:
     Execute the MCTS algorithm from the initial state given, with timeout in seconds
     """
     # core of the MCTS algorithm
-    def mcts(self, timeout=0.9, root_node=None):
+    def mcts(self, timeout=TIMEOUT, root_node=None):
         if root_node is None:
             root_node = self.create_root_node()
 
@@ -87,7 +90,13 @@ class MCTS:
     """ Choose a random action. Heuristics can be used here to improve simulations."""
     # TODO: Implement a better action selection heuristic
     def choose(self, state, agent_id):
-        return random.choice(self.mdp.get_actions(state, agent_id))
+        actions = self.mdp.get_actions(state, agent_id)
+
+        for action in actions:
+            if action in [(0, 0), (0, GRID_SIZE - 1), (GRID_SIZE - 1, 0), (GRID_SIZE - 1, GRID_SIZE - 1)]:
+                return action
+
+        return random.choice(actions)
 
     """ Simulate until a terminal state """
     def simulate(self, node):
