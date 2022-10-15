@@ -5,7 +5,7 @@ import random
 class MultiArmedBandit:
 
     """ Select an action for this state given from a list given a Q-function """
-    def select(self, state, actions, qfunction, node_visits):
+    def select(self, state, agent_id, actions, qfunction, node_visits):
         pass
 
     """ Reset a multi-armed bandit to its initial configuration """
@@ -19,7 +19,7 @@ class ModifiedUpperConfidenceBounds(MultiArmedBandit):
     fit the dedicated MCTS algorithm.
     """
 
-    def select(self, state, actions, qfunction, node_visits, C=1):
+    def select(self, state, agent_id, actions, qfunction, node_visits, C=1):
         """
         return an action based on the UCB1 algorithm.
 
@@ -32,7 +32,7 @@ class ModifiedUpperConfidenceBounds(MultiArmedBandit):
         max_value = float("-inf")
 
         for action in actions:
-            value = qfunction.get_q_value(state, action) + C * math.sqrt(
+            value = qfunction.get_q_value(state, agent_id, action) + C * math.sqrt(
                 2 * math.log(node_visits[state]) / node_visits[(state, action)])
 
             if value > max_value:

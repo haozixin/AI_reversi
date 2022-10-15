@@ -35,7 +35,7 @@ class SingleAgentNode(Node):
         else:
             """Otherwise fully expanded and not terminal state"""
             actions = list(self.children.keys())
-            action = self.bandit.select(self.state, actions, self.qfunction, Node.visits)
+            action = self.bandit.select(self.state, self.agent_id, actions, self.qfunction, Node.visits)
             return self.get_outcome_child(action).select()
 
     """ Expand a node if it is not a terminal node """
@@ -53,13 +53,13 @@ class SingleAgentNode(Node):
     def back_propagate(self, reward, child):
         action = child.action
 
-        Node.visits[self.state] = Node.visits[self.state] + 1
-        Node.visits[(self.state, action)] = Node.visits[(self.state, action)] + 1
+        Node.visits[self.state, self.agent_id] = Node.visits[self.state, self.agent_id] + 1
+        Node.visits[(self.state, self.agent_id, action)] = Node.visits[(self.state, self.agent_id, action)] + 1
 
-        delta = (1 / (Node.visits[(self.state, action)])) * (
-            reward - self.qfunction.get_q_value(self.state, action)
+        delta = (1 / (Node.visits[(self.state, self.agent_id, action)])) * (
+            reward - self.qfunction.get_q_value(self.state, self.agent_id, action)
         )
-        self.qfunction.update(self.state, action, delta)
+        self.qfunction.update(self.state, self.agent_id, action, delta)
 
         if self.parent:  # if parent is not None
             self.parent.back_propagate(self.reward + reward, self)

@@ -101,22 +101,29 @@ def generateSuccessor(game_state, action, agent_id):
         next_state = copy.deepcopy(game_state)
         update_color = game_state.agent_colors[agent_id]
         next_state.board[action[0]][action[1]] = update_color
+
         # iterate over all 8 directions and check pieces that require updates
         for direction in DIRECTIONS:
             cur_pos = (action[0] + direction[0], action[1] + direction[1])
             update_list = list()
             flag = False
+
             # Only searching for updates if the next piece in the direction is from the agent's opponent
             # if next_state.board[cur_pos[0]][cur_pos[1]] == self.agent_colors[(agent_id+1)%2]:
             while validPos(cur_pos) and next_state.board[cur_pos[0]][cur_pos[1]] != Cell.EMPTY:
                 if next_state.board[cur_pos[0]][cur_pos[1]] == update_color:
                     flag = True
                     break
+
                 update_list.append(cur_pos)
                 cur_pos = (cur_pos[0] + direction[0], cur_pos[1] + direction[1])
+
             if flag and len(update_list) != 0:
                 for i, j in update_list:
                     next_state.board[i][j] = update_color
+
+        next_state.agent_id = 1 - next_state.agent_id
+
         return next_state
 
 
