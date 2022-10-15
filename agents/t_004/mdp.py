@@ -56,8 +56,15 @@ class Reversi_MDP(MDP):
         self.init_agent_id = agent_id
         self.actions = actions
         self.game_state = game_state
+        self.legalActionsDict = {}
 
     def get_actions(self, game_state, agent_id):
+        # if (game_state.board, agent_id) in self.legalActionsDict:
+        #     return self.legalActionsDict[(game_state.board, agent_id)]
+        # else:
+        #     legalActions = getLegalActions(game_state, agent_id)
+        #     self.legalActionsDict[(game_state.board, agent_id)] = legalActions
+
         return getLegalActions(game_state, agent_id)
 
     def is_terminal(self, game_state):

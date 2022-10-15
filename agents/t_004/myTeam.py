@@ -20,5 +20,6 @@ class myAgent(Agent):
         single_agent_mcts = SingleAgentMCTS(mdp, self.qfunction, ucb)
         single_agent_mcts.mcts()
 
-        return max([self.qfunction.get_q_value(game_state, action) for action in actions])
+        return max([(action, self.qfunction.get_q_value(game_state, action))
+                    for action in actions], key=lambda x: x[1])[0]
 

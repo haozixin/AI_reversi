@@ -22,7 +22,7 @@ class SingleAgentNode(Node):
 
     """ Return true if and only if all child actions have been expanded """
     def is_fully_expanded(self):
-        valid_actions = self.mdp.get_actions(self.state)
+        valid_actions = self.mdp.get_actions(self.state, self.agent_id)
         if len(valid_actions) == len(self.children):
             return True
         else:
@@ -42,10 +42,10 @@ class SingleAgentNode(Node):
     def expand(self):
         if not self.mdp.is_terminal(self.state):
             # Randomly select an unexpanded action to expand
-            actions = self.mdp.get_actions(self.state) - self.children.keys()
+            actions = self.mdp.get_actions(self.state, self.agent_id) - self.children.keys()
             action = random.choice(list(actions))
 
-            self.children[action] = []
+            self.children[action] = None
             return self.get_outcome_child(action)
         return self
 
@@ -66,15 +66,15 @@ class SingleAgentNode(Node):
 
     """ Simulate the outcome of an action, and return the child node """
     def get_outcome_child(self, action):
-        (next_state, reward) = self.mdp.execute(self.state, action)
-
         # Find the corresponding state and return if this already exists
         if self.children[action]:
             return self.children[action]
 
+        (next_state, reward) = self.mdp.execute(self.state, action, self.agent_id)
+
         # This outcome has not occurred from this state-action pair previously
         new_child = SingleAgentNode(
-            self.mdp, self, next_state, self.qfunction, self.bandit, reward, action
+            self.mdp, self, next_state, self.qfunction, self.bandit, 1 - self.agent_id, reward, action
         )
 
         self.children[action] = new_child

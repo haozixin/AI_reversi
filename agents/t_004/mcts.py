@@ -61,7 +61,7 @@ class MCTS:
     Execute the MCTS algorithm from the initial state given, with timeout in seconds
     """
     # core of the MCTS algorithm
-    def mcts(self, timeout=0.5, root_node=None):
+    def mcts(self, timeout=0.9, root_node=None):
         if root_node is None:
             root_node = self.create_root_node()
 
@@ -86,26 +86,28 @@ class MCTS:
 
     """ Choose a random action. Heuristics can be used here to improve simulations."""
     # TODO: Implement a better action selection heuristic
-    def choose(self, state):
-        return random.choice(self.mdp.get_actions(state))
+    def choose(self, state, agent_id):
+        return random.choice(self.mdp.get_actions(state, agent_id))
 
     """ Simulate until a terminal state """
     def simulate(self, node):
         state = node.state
         cumulative_reward = 0.0
         depth = 0
+        current_agent = node.agent_id
+
         while not self.mdp.is_terminal(state):
             # Choose an action to execute
-            action = self.choose(state)
+            action = self.choose(state, current_agent)
 
             # Execute the action
-            (next_state, reward) = self.mdp.execute(state, action, node.agent_id)
+            (next_state, reward) = self.mdp.execute(state, action, current_agent)
 
             # Discount the reward
             cumulative_reward += pow(self.mdp.get_discount_factor(), depth) * reward
             depth += 1
-
             state = next_state
+            current_agent = 1 - current_agent
 
         return cumulative_reward
 

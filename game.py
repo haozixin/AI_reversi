@@ -104,7 +104,7 @@ class Game:
             else:
                 #If freedom is given to agents, let them return any action in any time period, at the risk of breaking 
                 #the simulation. This can be useful for debugging purposes.
-                if True:
+                if FREEDOM:
                     selected = agent.SelectAction(actions_copy, gs_copy)
                 else:
                     #Allow agent to select action within time limit. Any error will result in a penalty.
