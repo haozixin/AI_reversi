@@ -55,16 +55,17 @@ class Node:
 
 
 class MCTS:
-    def __init__(self, mdp, qfunction, bandit):
+    def __init__(self, mdp, qfunction, bandit, node_visits):
         self.mdp = mdp
         self.qfunction = qfunction
         self.bandit = bandit
-
+        Node.visits = node_visits
     """
     Execute the MCTS algorithm from the initial state given, with timeout in seconds
     """
-    # core of the MCTS algorithm
+    # MCTS rollout
     def mcts(self, timeout=TIMEOUT, root_node=None):
+        count = 0
         if root_node is None:
             root_node = self.create_root_node()
 
@@ -79,7 +80,8 @@ class MCTS:
                 selected_node.back_propagate(reward, child)
 
             current_time = time.time()
-
+            count += 1
+            print("Rollout counts: ", count)
         return root_node
 
     """ Create a root node representing an initial state """
