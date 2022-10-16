@@ -1,13 +1,21 @@
 import copy
 import math
 import operator
-
 from Reversi.reversi_utils import Cell, GRID_SIZE
 from template import Agent
 
 EARLY_GAME_THRESHOLD = 28
 LATE_GAME_THRESHOLD = 57
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+INIT_STATIC_WEIGHTS = [
+                    [4, -3, 2, 2, 2, 2, -3, 4],
+                    [-3, -4, -1, -1, -1, -1, -4, -3],
+                    [2, -1, 1, 0, 0, 1, -1, 2],
+                    [2, -1, 0, 1, 1, 0, -1, 2],
+                    [2, -1, 0, 1, 1, 0, -1, 2],
+                    [2, -1, 1, 0, 0, 1, -1, 2],
+                    [-3, -4, -1, -1, -1, -1, -4, -3],
+                    [4, -3, 2, 2, 2, 2, -3, 4]]
 
 
 class myAgent(Agent):
@@ -16,6 +24,7 @@ class myAgent(Agent):
         self.depth = 3
         self.agent_id = _id
         self.stabilityMatrix = None
+        self.static_weights = INIT_STATIC_WEIGHTS
 
     def SelectAction(self, actions, game_state):
         actions = list(set(actions))
@@ -28,7 +37,6 @@ class myAgent(Agent):
         the best play from the opponent measured by us. This function embeds
         the alpha-beta pruning strategy which gets rid of unnecessary
         calculation that doesn't improve the results to save time complexity.
-
         depth: The remaining depth of the search.
         currentPlayer: The agent id of the current player.
         """
@@ -71,9 +79,16 @@ class myAgent(Agent):
             return minEval
 
     def evaluation(self, game_state, weights, mobilityHeuValue):
-        return weights[0] * self.cornerHeuristic(game_state) \
-               + weights[1] * self.pieceCountHeuristic(game_state) \
-               + weights[2] * mobilityHeuValue + weights[3] * self.stabilityHeuristic(game_state)
+        corner = weights[0] * self.cornerHeuristic(game_state)
+        counts = weights[1] * self.pieceCountHeuristic(game_state)
+        mobility = weights[2] * mobilityHeuValue
+        stability = weights[3] * self.stabilityHeuristic(game_state)
+        sw = weights[4] * self.staticWeightsHeuristic(game_state)
+        total = corner + counts + mobility + stability + sw
+
+        # print("Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, total: {}".format(corner, counts, mobility, stability, sw, total))
+
+        return total
 
     def mobilityHeuristic(self, mobility, mobility_op):
         if (mobility + mobility_op) != 0:
@@ -117,22 +132,22 @@ class myAgent(Agent):
 
     def selectWeightSet(self, curr_board_time):
         """
-        Dynamically changing the weights based on the
+        Dynamically change the weights based on the
         current board situation (time), measured in
         the number of pieces on the board.
         """
         weight_sets = [
-            [100, -10, 5, 20],  # EARLY
-            [100, 5, 5, 15],  # MIDDLE
-            [100, 20, 5, 10],  # 57
-            [100, 35, 5, 0],   # 58
-            [100, 50, 3, 0],  # 59
-            [100, 60, 3, 0],  # 60
-            [100, 65, 3, 0],  # 61
-            [100, 70, 3, 0],  # 62
-            [100, 150, 0, 0],  # 63
-            [0, 150, 0, 0]  # 64
-        ]  # [corner heu, piece count, mobility]
+            [100, 0, 5, 20, 40],  # EARLY
+            [100, 5, 5, 15, 20],  # MIDDLE
+            [100, 20, 5, 15, 10],  # 57
+            [100, 35, 5, 15, 10],   # 58
+            [100, 50, 3, 15, 10],  # 59
+            [100, 60, 3, 15, 0],  # 60
+            [100, 65, 0, 15, 0],  # 61
+            [100, 70, 0, 0, 0],  # 622
+            [100, 150, 0, 0, 0],  # 63
+            [0, 150, 0, 0, 0]  # 64
+        ]  # [corner heu, piece count, mobility, stability, static weights]
 
         if curr_board_time < EARLY_GAME_THRESHOLD:
             return weight_sets[0]
@@ -156,6 +171,16 @@ class myAgent(Agent):
             return weight_sets[9]
 
     def calcStability(self, game_state, player):
+        """
+        Starting from the corners, assess their neighbors, propagate around.
+        A location is stable if all four directions have adjacent stable pieces.
+
+        All stable pieces will be counted. As even if one location isn't
+        marked as stable due to the sequence of its stable neighbors haven't
+        been assessed, when its stable neighbors being assessed, that location
+        will be assessed again as a different neighbor.
+        """
+
         def isStableHorizontal(disc, stabilityMatrix1):
             if disc[1] in [0, GRID_SIZE - 1]:
                 return True
@@ -192,10 +217,11 @@ class myAgent(Agent):
 
         stablePieces = 0
         stabilityMatrix = [[False for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
-        processingList = []
+        processingList = []  # store stable pieces, popped later to assess their neighbors
 
         for i in [0, GRID_SIZE - 1]:
             for j in [0, GRID_SIZE - 1]:
+                """Starting from the corners, only corners are immediate stable."""
                 if game_state.board[i][j] == game_state.agent_colors[player]:
                     stabilityMatrix[i][j] = True
                     processingList.append((i, j))
@@ -205,6 +231,10 @@ class myAgent(Agent):
             pos = processingList.pop(0)
 
             for direction in DIRECTIONS:
+                """
+                For each neighbor.
+                (Please NOTE*: x and y are inverse, i.e., x is actually row, y is column.)
+                """
                 x, y = tuple(map(operator.add, pos, direction))
 
                 if not validPos((x, y)):
@@ -232,6 +262,19 @@ class myAgent(Agent):
             return 100 * (stability - stability_op) / (stability + stability_op)
         else:
             return 0
+
+    def staticWeightsHeuristic(self, game_state):
+        weight = 0
+        op_weight = 0
+
+        for i in range(GRID_SIZE):
+            for j in range(GRID_SIZE):
+                if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
+                    weight += self.static_weights[i][j]
+                elif game_state.board[i][j] == game_state.agent_colors[1 - self.agent_id]:
+                    op_weight += self.static_weights[i][j]
+
+        return weight - op_weight
 
 
 def generateSuccessor(game_state, action, agent_id):
@@ -271,10 +314,10 @@ def gameEnds(game_state):
 def getLegalActions(game_state, agent_id):
     actions = []
     # print(f"Current game state: \n{boardToString(game_state.board,GRID_SIZE)}")
-    for x in range(GRID_SIZE):
-        for y in range(GRID_SIZE):
-            if game_state.board[x][y] == Cell.EMPTY:
-                pos = (x, y)
+    for i in range(GRID_SIZE):
+        for j in range(GRID_SIZE):
+            if game_state.board[i][j] == Cell.EMPTY:
+                pos = (i, j)
                 appended = False
 
                 for direction in DIRECTIONS:
@@ -299,7 +342,7 @@ def getLegalActions(game_state, agent_id):
 
 
 def validPos(pos):
-    x, y = pos
+    y, x = pos
     return 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE
 
 
