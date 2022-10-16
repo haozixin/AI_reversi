@@ -122,8 +122,6 @@ def generateSuccessor(game_state, action, agent_id):
                 for i, j in update_list:
                     next_state.board[i][j] = update_color
 
-        next_state.agent_id = 1 - next_state.agent_id
-
         return next_state
 
 

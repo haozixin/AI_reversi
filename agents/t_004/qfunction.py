@@ -2,10 +2,10 @@ import utils
 
 
 class QFunction:
-    def update(self, state, agent_id, action, delta):
+    def update(self, state, action, delta):
         utils.raiseNotDefined()
         pass
 
-    def get_q_value(self, state, agent_id, action):
+    def get_q_value(self, state, action):
         utils.raiseNotDefined()
         pass

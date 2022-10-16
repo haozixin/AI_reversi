@@ -1,5 +1,6 @@
 import random
 from agents.t_004.mcts import Node, MCTS
+from agents.t_004.myTeam_utils import *
 
 
 class SingleAgentNode(Node):
@@ -35,7 +36,8 @@ class SingleAgentNode(Node):
         else:
             """Otherwise fully expanded and not terminal state"""
             actions = list(self.children.keys())
-            action = self.bandit.select(self.state, self.agent_id, actions, self.qfunction, Node.visits)
+            action = self.bandit.select(embedReversiState(self.state, self.agent_id),
+                                        actions, self.qfunction, Node.visits)
             return self.get_outcome_child(action).select()
 
     """ Expand a node if it is not a terminal node """
@@ -53,13 +55,15 @@ class SingleAgentNode(Node):
     def back_propagate(self, reward, child):
         action = child.action
 
-        Node.visits[self.state, self.agent_id] = Node.visits[self.state, self.agent_id] + 1
-        Node.visits[(self.state, self.agent_id, action)] = Node.visits[(self.state, self.agent_id, action)] + 1
+        embeddedState = embedReversiState(self.state, self.agent_id)
 
-        delta = (1 / (Node.visits[(self.state, self.agent_id, action)])) * (
-            reward - self.qfunction.get_q_value(self.state, self.agent_id, action)
+        Node.visits[embeddedState] += 1
+        Node.visits[(embeddedState, action)] += 1
+
+        delta = (1 / (Node.visits[(embeddedState, action)])) * (
+            reward - self.qfunction.get_q_value(embeddedState, action)
         )
-        self.qfunction.update(self.state, self.agent_id, action, delta)
+        self.qfunction.update(embeddedState, action, delta)
 
         if self.parent:  # if parent is not None
             self.parent.back_propagate(self.reward + reward, self)
