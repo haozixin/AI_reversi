@@ -1,7 +1,6 @@
 import copy
 import math
 import operator
-
 from Reversi.reversi_utils import Cell, GRID_SIZE
 from template import Agent
 
@@ -29,13 +28,7 @@ class myAgent(Agent):
 
     def SelectAction(self, actions, game_state):
         actions = list(set(actions))
-
-        res = self.minimax(self.depth, self.agent_id, game_state, actions, -math.inf, math.inf, 0)[1]
-
-        if res == (6, 3):
-            print()
-
-        return res
+        return self.minimax(self.depth, self.agent_id, game_state, actions, -math.inf, math.inf, 0)[1]
 
     def minimax(self, depth, currentPlayer, game_state, actions, alpha, beta, mobilityHeuValue):
         """
@@ -93,7 +86,7 @@ class myAgent(Agent):
         sw = weights[4] * self.staticWeightsHeuristic(game_state)
         total = corner + counts + mobility + stability + sw
 
-        print("Original counts: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, total: {}".format(self.pieceCountHeuristic(game_state), corner, counts, mobility, stability, sw, total))
+        # print("Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, total: {}".format(corner, counts, mobility, stability, sw, total))
 
         return total
 
@@ -139,16 +132,16 @@ class myAgent(Agent):
 
     def selectWeightSet(self, curr_board_time):
         """
-        Dynamically changing the weights based on the
+        Dynamically change the weights based on the
         current board situation (time), measured in
         the number of pieces on the board.
         """
         weight_sets = [
-            [100, 0, 5, 20, 15],  # EARLY
-            [100, 5, 5, 15, 10],  # MIDDLE
-            [100, 20, 5, 15, 5],  # 57
-            [100, 35, 5, 15, 5],   # 58
-            [100, 50, 3, 15, 5],  # 59
+            [100, 0, 5, 20, 40],  # EARLY
+            [100, 5, 5, 15, 20],  # MIDDLE
+            [100, 20, 5, 15, 10],  # 57
+            [100, 35, 5, 15, 10],   # 58
+            [100, 50, 3, 15, 10],  # 59
             [100, 60, 3, 15, 0],  # 60
             [100, 65, 0, 15, 0],  # 61
             [100, 70, 0, 0, 0],  # 622
