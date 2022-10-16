@@ -4,6 +4,7 @@ from abc import abstractmethod
 from Reversi.reversi_utils import GRID_SIZE, Cell
 from collections import defaultdict
 import random
+from agents.t_004.myTeam_utils import *
 
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 DISCOUNT_FACTOR = 0.9
@@ -59,13 +60,13 @@ class Reversi_MDP(MDP):
         self.legalActionsDict = {}
 
     def get_actions(self, game_state, agent_id):
-        # if (game_state.board, agent_id) in self.legalActionsDict:
-        #     return self.legalActionsDict[(game_state.board, agent_id)]
-        # else:
-        #     legalActions = getLegalActions(game_state, agent_id)
-        #     self.legalActionsDict[(game_state.board, agent_id)] = legalActions
-
-        return getLegalActions(game_state, agent_id)
+        embeddedGameState = embedReversiState(game_state, agent_id)
+        if embeddedGameState in self.legalActionsDict:
+            return self.legalActionsDict[embeddedGameState]
+        else:
+            legalActions = getLegalActions(game_state, agent_id)
+            self.legalActionsDict[embeddedGameState] = legalActions
+            return legalActions
 
     def is_terminal(self, game_state):
         return gameEnds(game_state)

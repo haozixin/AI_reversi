@@ -37,7 +37,7 @@ class SingleAgentNode(Node):
             """Otherwise fully expanded and not terminal state"""
             actions = list(self.children.keys())
             action = self.bandit.select(embedReversiState(self.state, self.agent_id),
-                                        actions, self.qfunction, Node.visits)
+                                        actions, self.qfunction, Node.visits, self.agent_id == self.mdp.init_agent_id)
             return self.get_outcome_child(action).select()
 
     """ Expand a node if it is not a terminal node """

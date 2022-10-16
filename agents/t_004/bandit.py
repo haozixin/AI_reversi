@@ -5,7 +5,7 @@ import random
 class MultiArmedBandit:
 
     """ Select an action for this state given from a list given a Q-function """
-    def select(self, state, agent_id, actions, qfunction, node_visits):
+    def select(self, state, agent_id, actions, qfunction, node_visits, maximising):
         pass
 
     """ Reset a multi-armed bandit to its initial configuration """
@@ -19,7 +19,7 @@ class ModifiedUpperConfidenceBounds(MultiArmedBandit):
     fit the dedicated MCTS algorithm.
     """
 
-    def select(self, state, actions, qfunction, node_visits, C=1):
+    def select(self, state, actions, qfunction, node_visits, maximising, C=1):
         """
         return an action based on the UCB1 algorithm.
 
@@ -28,22 +28,29 @@ class ModifiedUpperConfidenceBounds(MultiArmedBandit):
         selection will be called unless all actions are expanded
         for a particular node.
         """
-        max_actions = []
-        max_value = float("-inf")
+        best_actions = []
+        best_value = -math.inf if maximising else math.inf
 
         for action in actions:
             value = qfunction.get_q_value(state, action) + C * math.sqrt(
                 2 * math.log(node_visits[state]) / node_visits[(state, action)])
 
-            if value > max_value:
-                max_actions = [action]
-                max_value = value
-            elif value == max_value:
-                max_actions += [action]
+            if maximising:
+                if value > best_value:
+                    best_actions = [action]
+                    best_value = value
+                elif value == best_value:
+                    best_actions += [action]
+            else:
+                if value < best_value:
+                    best_actions = [action]
+                    best_value = value
+                elif value == best_value:
+                    best_actions += [action]
 
         # if there are multiple actions with the highest value
         # choose one randomly
-        result = random.choice(max_actions)
+        result = random.choice(best_actions)
 
         return result
 

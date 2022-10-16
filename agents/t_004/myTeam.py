@@ -8,6 +8,8 @@ from template import Agent
 
 
 class myAgent(Agent):
+    found = 0
+
     def __init__(self, _id):
         super().__init__(_id)
         self.agent_id = _id
@@ -24,6 +26,7 @@ class myAgent(Agent):
         single_agent_mcts.mcts()
 
         self.node_visits = Node.visits
+        #print(self.node_visits)
 
         return max([(action, self.qfunction.get_q_value(static_game_state, action))
                     for action in actions], key=lambda x: x[1])[0]
