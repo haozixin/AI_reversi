@@ -444,7 +444,7 @@ def loadParameter():
     parser.add_option('-w', '--warningTimeLimit', type='float',help='Time limit for a warning of one move in seconds (default: 1)', default=1.0)
     parser.add_option('--startRoundWarningTimeLimit', type='float',help='Time limit for a warning of initialization for each round in seconds (default: 5)', default=5.0)
     parser.add_option('--numOfWarnings', type='int',help='Num of warnings a team can get before fail (default: 3)', default=3)
-    parser.add_option('-m', '--multipleGames', type='int',help='Run multiple games in a roll', default=1)
+    parser.add_option('-m', '--multipleGames', type='int',help='Run multiple games in a roll', default=10)
     parser.add_option('--setRandomSeed', type='int',help='Set the random seed, otherwise it will be completely random (default: 90054)', default=90054)
     parser.add_option('-s','--saveGameRecord', action='store_true', help='Writes game histories to a file (named by teams\' names and the time they were played) (default: False)', default=False)
     parser.add_option('-o','--output', help='output directory for replay and log (default: output)',default='output')

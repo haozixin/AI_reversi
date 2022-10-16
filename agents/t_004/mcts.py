@@ -65,7 +65,6 @@ class MCTS:
     """
     # MCTS rollout
     def mcts(self, timeout=TIMEOUT, root_node=None):
-        count = 0
         if root_node is None:
             root_node = self.create_root_node()
 
@@ -80,8 +79,6 @@ class MCTS:
                 selected_node.back_propagate(reward, child)
 
             current_time = time.time()
-            count += 1
-            print("Rollout counts: ", count)
         return root_node
 
     """ Create a root node representing an initial state """
