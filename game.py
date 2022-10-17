@@ -12,8 +12,8 @@ from   func_timeout import func_timeout, FunctionTimedOut
     
 # CONSTANTS ----------------------------------------------------------------------------------------------------------#
 
-FREEDOM = True  #Whether or not to penalise agents for incorrect moves and timeouts. Useful for debugging.
-WARMUP  = 15    #Warmup period (time given to each agent on their first turn).
+FREEDOM = False  #Whether or not to penalise agents for incorrect moves and timeouts. Useful for debugging.
+WARMUP = 15    #Warmup period (time given to each agent on their first turn).
 
 # CLASS DEF ----------------------------------------------------------------------------------------------------------#
 
