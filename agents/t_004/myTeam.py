@@ -10,14 +10,27 @@ DEPTH = 3
 EARLY_GAME_THRESHOLD = 28
 LATE_GAME_THRESHOLD = 57
 INIT_STATIC_WEIGHTS = [
-                    [4, -3, 2, 2, 2, 2, -3, 4],
-                    [-3, -4, -1, -1, -1, -1, -4, -3],
-                    [2, -1, 1, 0, 0, 1, -1, 2],
-                    [2, -1, 0, 1, 1, 0, -1, 2],
-                    [2, -1, 0, 1, 1, 0, -1, 2],
-                    [2, -1, 1, 0, 0, 1, -1, 2],
-                    [-3, -4, -1, -1, -1, -1, -4, -3],
-                    [4, -3, 2, 2, 2, 2, -3, 4]]
+    [4, -3, 2, 2, 2, 2, -3, 4],
+    [-3, -4, -1, -1, -1, -1, -4, -3],
+    [2, -1, 1, 0, 0, 1, -1, 2],
+    [2, -1, 0, 1, 1, 0, -1, 2],
+    [2, -1, 0, 1, 1, 0, -1, 2],
+    [2, -1, 1, 0, 0, 1, -1, 2],
+    [-3, -4, -1, -1, -1, -1, -4, -3],
+    [4, -3, 2, 2, 2, 2, -3, 4]]
+
+WEIGHT_SETS = [
+    [200, -2, 10, 20, 50],  # EARLY
+    [200, 1, 10, 20, 50],  # MIDDLE
+    [200, 20, 5, 20, 20],  # 57
+    [200, 30, 5, 20, 20],  # 58
+    [200, 50, 5, 20, 20],  # 59
+    [200, 60, 5, 20, 0],  # 60
+    [200, 80, 0, 20, 0],  # 61
+    [200, 100, 0, 0, 0],  # 62
+    [100, 150, 0, 0, 0],  # 63
+    [0, 150, 0, 0, 0]  # 64
+]  # [corner heu, piece count, mobility, stability, static weights]
 
 
 class myAgent(Agent):
@@ -26,7 +39,6 @@ class myAgent(Agent):
         self.depth = DEPTH
         self.agent_id = _id
         self.stabilityMatrix = None
-        self.static_weights = INIT_STATIC_WEIGHTS
         self.boardtime = 4
 
     def SelectAction(self, actions, game_state):
@@ -90,13 +102,14 @@ class myAgent(Agent):
         sw = weights[4] * self.staticWeightsHeuristic(game_state)
         total = corner + counts + mobility + stability + sw
 
-        # print("Board time: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, total: {}".format(self.boardtime, corner, counts, mobility, stability, sw, total))
+        msg = "Board time: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, total: {}".format(self.boardtime, corner, counts, mobility, stability, sw, total)
+        #print(msg)
 
         return total
 
     def mobilityHeuristic(self, mobility, mobility_op):
         if (mobility + mobility_op) != 0:
-            return 100 * mobility / (mobility + mobility_op)
+            return 100 * (mobility - mobility_op) / (mobility + mobility_op)
         else:
             return 0
 
@@ -137,39 +150,26 @@ class myAgent(Agent):
         current board situation (time), measured in
         the number of pieces on the board.
         """
-        weight_sets = [
-            [200, -5, 5, 20, 100],  # EARLY
-            [200, 1, 5, 20, 80],  # MIDDLE
-            [200, 10, 5, 20, 30],  # 57
-            [200, 20, 5, 20, 30],   # 58
-            [200, 30, 5, 20, 30],  # 59
-            [200, 60, 5, 20, 0],  # 60
-            [200, 80, 0, 20, 0],  # 61
-            [200, 100, 0, 0, 0],  # 62
-            [100, 150, 0, 0, 0],  # 63
-            [0, 150, 0, 0, 0]  # 64
-        ]  # [corner heu, piece count, mobility, stability, static weights]
-
         if curr_board_time < EARLY_GAME_THRESHOLD:
-            return weight_sets[0]
+            return WEIGHT_SETS[0]
         elif curr_board_time < LATE_GAME_THRESHOLD:
-            return weight_sets[1]
+            return WEIGHT_SETS[1]
         elif curr_board_time == LATE_GAME_THRESHOLD:
-            return weight_sets[2]
+            return WEIGHT_SETS[2]
         elif curr_board_time == LATE_GAME_THRESHOLD + 1:
-            return weight_sets[3]
+            return WEIGHT_SETS[3]
         elif curr_board_time == LATE_GAME_THRESHOLD + 2:
-            return weight_sets[4]
+            return WEIGHT_SETS[4]
         elif curr_board_time == LATE_GAME_THRESHOLD + 3:
-            return weight_sets[5]
+            return WEIGHT_SETS[5]
         elif curr_board_time == LATE_GAME_THRESHOLD + 4:
-            return weight_sets[6]
+            return WEIGHT_SETS[6]
         elif curr_board_time == LATE_GAME_THRESHOLD + 5:
-            return weight_sets[7]
+            return WEIGHT_SETS[7]
         elif curr_board_time == LATE_GAME_THRESHOLD + 6:
-            return weight_sets[8]
+            return WEIGHT_SETS[8]
         else:  # curr_board_time == 64
-            return weight_sets[9]
+            return WEIGHT_SETS[9]
 
     def calcStability(self, game_state, player):
         """
@@ -265,15 +265,16 @@ class myAgent(Agent):
             return 0
 
     def staticWeightsHeuristic(self, game_state):
+        weight_table = INIT_STATIC_WEIGHTS
         weight = 0
         op_weight = 0
 
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
                 if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
-                    weight += self.static_weights[i][j]
+                    weight += weight_table[i][j]
                 elif game_state.board[i][j] == game_state.agent_colors[1 - self.agent_id]:
-                    op_weight += self.static_weights[i][j]
+                    op_weight += weight_table[i][j]
 
         return weight - op_weight
 
