@@ -4,9 +4,11 @@ import operator
 from Reversi.reversi_utils import Cell, GRID_SIZE
 from template import Agent
 
+
+DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+DEPTH = 3
 EARLY_GAME_THRESHOLD = 28
 LATE_GAME_THRESHOLD = 57
-DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 INIT_STATIC_WEIGHTS = [
                     [4, -3, 2, 2, 2, 2, -3, 4],
                     [-3, -4, -1, -1, -1, -1, -4, -3],
@@ -21,13 +23,15 @@ INIT_STATIC_WEIGHTS = [
 class myAgent(Agent):
     def __init__(self, _id):
         super().__init__(_id)
-        self.depth = 3
+        self.depth = DEPTH
         self.agent_id = _id
         self.stabilityMatrix = None
         self.static_weights = INIT_STATIC_WEIGHTS
+        self.boardtime = 4
 
     def SelectAction(self, actions, game_state):
         actions = list(set(actions))
+        self.boardtime = getTotalNumOfPieces(game_state)
         return self.minimax(self.depth, self.agent_id, game_state, actions, -math.inf, math.inf, 0)[1]
 
     def minimax(self, depth, currentPlayer, game_state, actions, alpha, beta, mobilityHeuValue):
@@ -86,13 +90,13 @@ class myAgent(Agent):
         sw = weights[4] * self.staticWeightsHeuristic(game_state)
         total = corner + counts + mobility + stability + sw
 
-        # print("Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, total: {}".format(corner, counts, mobility, stability, sw, total))
+        # print("Board time: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, total: {}".format(self.boardtime, corner, counts, mobility, stability, sw, total))
 
         return total
 
     def mobilityHeuristic(self, mobility, mobility_op):
         if (mobility + mobility_op) != 0:
-            return 100 * (mobility - mobility_op) / (mobility + mobility_op)
+            return 100 * mobility / (mobility + mobility_op)
         else:
             return 0
 
@@ -120,10 +124,7 @@ class myAgent(Agent):
         if game_state.board[GRID_SIZE - 1][GRID_SIZE - 1] == game_state.agent_colors[op_agent_id]:
             opCornersCaptured += 1
 
-        if (cornersCaptured + opCornersCaptured) != 0:
-            return 100 * (cornersCaptured - opCornersCaptured) / (cornersCaptured + opCornersCaptured)
-        else:
-            return 0
+        return 25 * (cornersCaptured - opCornersCaptured)
 
     def pieceCountHeuristic(self, game_state):
         score, opScore = countScoreForBoth(game_state.board, GRID_SIZE, game_state.agent_colors[self.agent_id])
@@ -137,14 +138,14 @@ class myAgent(Agent):
         the number of pieces on the board.
         """
         weight_sets = [
-            [100, 0, 5, 20, 40],  # EARLY
-            [100, 5, 5, 15, 20],  # MIDDLE
-            [100, 20, 5, 15, 10],  # 57
-            [100, 35, 5, 15, 10],   # 58
-            [100, 50, 3, 15, 10],  # 59
-            [100, 60, 3, 15, 0],  # 60
-            [100, 65, 0, 15, 0],  # 61
-            [100, 70, 0, 0, 0],  # 622
+            [200, -5, 5, 20, 100],  # EARLY
+            [200, 1, 5, 20, 80],  # MIDDLE
+            [200, 10, 5, 20, 30],  # 57
+            [200, 20, 5, 20, 30],   # 58
+            [200, 30, 5, 20, 30],  # 59
+            [200, 60, 5, 20, 0],  # 60
+            [200, 80, 0, 20, 0],  # 61
+            [200, 100, 0, 0, 0],  # 62
             [100, 150, 0, 0, 0],  # 63
             [0, 150, 0, 0, 0]  # 64
         ]  # [corner heu, piece count, mobility, stability, static weights]
