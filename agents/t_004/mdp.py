@@ -78,9 +78,9 @@ class Reversi_MDP(MDP):
             if score > opScore:
                 return 1
             elif score == opScore:
-                return 0.5
+                return 0
             else:
-                return 0.0
+                return -1
         else:
             return 0.0
 

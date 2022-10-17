@@ -5,7 +5,7 @@ import random
 from collections import defaultdict
 from Reversi.reversi_utils import GRID_SIZE
 
-TIMEOUT = 0.9
+TIMEOUT = 0.975
 
 
 class Node:
