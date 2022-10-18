@@ -278,6 +278,25 @@ class myAgent(Agent):
 
         return weight - op_weight
 
+    def frontierHeuristic(self, game_state):
+        frontier = 0
+        op_frontier = 0
+
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                if game_state.board[row][col] == game_state.agent_colors[self.agent_id]:
+                    for direction in DIRECTIONS:
+                        neighbor = tuple(map(operator.add, (row, col), direction))
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            frontier += 1
+                elif game_state.board[row][col] == game_state.agent_colors[1 - self.agent_id]:
+                    for direction in DIRECTIONS:
+                        neighbor = tuple(map(operator.add, (row, col), direction))
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            op_frontier += 1
+
+        return 100 * (op_frontier - frontier) / (frontier + op_frontier) if frontier + op_frontier != 0 else 0
+
 
 def generateSuccessor(game_state, action, agent_id):
     if action == "Pass":
