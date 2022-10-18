@@ -1,7 +1,6 @@
-
 import math
 from template import Agent
-from myTeam_utils import *
+from agents.t_004.myTeam_utils import *
 
 
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]

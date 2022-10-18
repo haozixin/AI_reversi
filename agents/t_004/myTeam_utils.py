@@ -133,4 +133,5 @@ def generateSuccessor(game_state, action, agent_id):
             if flag and len(update_list) != 0:
                 for i, j in update_list:
                     next_state.board[i][j] = update_color
+
         return next_state
