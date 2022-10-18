@@ -93,12 +93,15 @@ class myAgent(Agent):
             return minEval
 
     def evaluation(self, game_state, weights, mobilityHeuValue):
+        pieceCountHeuValue, staticWeightHeuValue, frontierHeuValue = \
+            self.countPieceCountAndStaticWeightsAndFrontierHeuristics(game_state)
+
         corner = weights[0] * self.cornerHeuristic(game_state)
-        counts = weights[1] * self.pieceCountHeuristic(game_state)
+        counts = weights[1] * pieceCountHeuValue
         mobility = weights[2] * mobilityHeuValue
         stability = weights[3] * self.stabilityHeuristic(game_state)
-        sw = weights[4] * self.staticWeightsHeuristic(game_state)
-        frontier = weights[5] * self.frontierHeuristic(game_state)
+        sw = weights[4] * staticWeightHeuValue
+        frontier = weights[5] * frontierHeuValue
         total = corner + counts + mobility + stability + sw + frontier
 
         msg = "Board time: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, frontier: {}, total: {}".format(self.boardtime, corner, counts, mobility, stability, sw, frontier, total)
@@ -137,11 +140,6 @@ class myAgent(Agent):
             opCornersCaptured += 1
 
         return 25 * (cornersCaptured - opCornersCaptured)
-
-    def pieceCountHeuristic(self, game_state):
-        score, opScore = countScoreForBoth(game_state.board, GRID_SIZE, game_state.agent_colors[self.agent_id])
-
-        return 100 * (score - opScore) / (score + opScore)  # denominator always != 0 because of the game initialisation
 
     def selectWeightSet(self, curr_board_time):
         """
@@ -260,19 +258,59 @@ class myAgent(Agent):
 
         return stability - stability_op  # ranges from -64 to 64
 
+    def countPieceCountAndStaticWeightsAndFrontierHeuristics(self, game_state):
+        score = 0
+        op_score = 0
+        weight = 0
+        op_weight = 0
+        frontier = 0
+        op_frontier = 0
+
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                if game_state.board[row][col] == game_state.agent_colors[self.agent_id]:
+                    score += 1
+                    weight += INIT_STATIC_WEIGHTS[row][col]
+
+                    for direction in DIRECTIONS:
+                        neighbor = tuple(map(operator.add, (row, col), direction))
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            frontier += 1
+                elif game_state.board[row][col] == game_state.agent_colors[1 - self.agent_id]:
+                    op_score += 1
+                    op_weight += INIT_STATIC_WEIGHTS[row][col]
+
+                    for direction in DIRECTIONS:
+                        neighbor = tuple(map(operator.add, (row, col), direction))
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            op_frontier += 1
+
+        """denominator always != 0 because of the game initialisation"""
+        piece_count_heu = 100 * (score - op_score) / (score + op_score)
+
+        static_weight_heu = weight - op_weight
+
+        frontier_heu = 100 * (op_frontier - frontier) / (frontier + op_frontier) if frontier + op_frontier != 0 else 0
+
+        return piece_count_heu, static_weight_heu, frontier_heu
+
     def staticWeightsHeuristic(self, game_state):
-        weight_table = INIT_STATIC_WEIGHTS
         weight = 0
         op_weight = 0
 
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
                 if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
-                    weight += weight_table[i][j]
+                    weight += INIT_STATIC_WEIGHTS[i][j]
                 elif game_state.board[i][j] == game_state.agent_colors[1 - self.agent_id]:
-                    op_weight += weight_table[i][j]
+                    op_weight += INIT_STATIC_WEIGHTS[i][j]
 
         return weight - op_weight
+
+    def pieceCountHeuristic(self, game_state):
+        score, opScore = countScoreForBoth(game_state.board, GRID_SIZE, game_state.agent_colors[self.agent_id])
+
+        return 100 * (score - opScore) / (score + opScore)  # denominator always != 0 because of the game initialisation
 
     def frontierHeuristic(self, game_state):
         frontier = 0
@@ -292,6 +330,3 @@ class myAgent(Agent):
                             op_frontier += 1
 
         return 100 * (op_frontier - frontier) / (frontier + op_frontier) if frontier + op_frontier != 0 else 0
-
-
-

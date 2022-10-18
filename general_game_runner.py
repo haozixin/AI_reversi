@@ -418,7 +418,7 @@ def loadParameter():
     parser = OptionParser(usageStr)
     # parser.add_option('-r','--red', help='Red team agent file', default=DEFAULT_AGENT)
     # parser.add_option('-b','--blue', help='Blue team agent file', default=DEFAULT_AGENT)
-    parser.add_option('-a','--agents', help='A list of the agents, etc, agents.myteam.player', default="agents.t_004.myTeam,agents.t_004.test")
+    parser.add_option('-a','--agents', help='A list of the agents, etc, agents.myteam.player', default="agents.t_004.myTeam2,agents.t_004.test")
 
     # parser.add_option('--redName', help='Red agent name', default='Red')
     # parser.add_option('--blueName', help='Blue agent name', default='Blue')
