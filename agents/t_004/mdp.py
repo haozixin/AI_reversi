@@ -2,12 +2,7 @@ import copy
 import operator
 from abc import abstractmethod
 from Reversi.reversi_utils import GRID_SIZE, Cell
-from collections import defaultdict
-import random
 from agents.t_004.myTeam_utils import *
-
-DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-DISCOUNT_FACTOR = 0.9
 
 
 class MDP:
