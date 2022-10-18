@@ -94,7 +94,7 @@ class myAgent(Agent):
 
     def evaluation(self, game_state, weights, mobilityHeuValue):
         pieceCountHeuValue, staticWeightHeuValue, frontierHeuValue = \
-            self.countPieceCountAndStaticWeightsAndFrontierHeuristics(game_state)
+            self.calcPieceCountAndStaticWeightsAndFrontierHeuristics(game_state)
 
         corner = weights[0] * self.cornerHeuristic(game_state)
         counts = weights[1] * pieceCountHeuValue
@@ -258,7 +258,7 @@ class myAgent(Agent):
 
         return stability - stability_op  # ranges from -64 to 64
 
-    def countPieceCountAndStaticWeightsAndFrontierHeuristics(self, game_state):
+    def calcPieceCountAndStaticWeightsAndFrontierHeuristics(self, game_state):
         score = 0
         op_score = 0
         weight = 0

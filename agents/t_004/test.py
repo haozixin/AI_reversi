@@ -1,24 +1,47 @@
-import copy
 import math
-import operator
-
-from Reversi.reversi_utils import Cell, GRID_SIZE
 from template import Agent
+from agents.t_004.myTeam_utils import *
 
+
+DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+DEPTH = 3
 EARLY_GAME_THRESHOLD = 28
 LATE_GAME_THRESHOLD = 57
-DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+INIT_STATIC_WEIGHTS = [
+    [4, -3, 2, 2, 2, 2, -3, 4],
+    [-3, -4, -1, -1, -1, -1, -4, -3],
+    [2, -1, 1, 0, 0, 1, -1, 2],
+    [2, -1, 0, 1, 1, 0, -1, 2],
+    [2, -1, 0, 1, 1, 0, -1, 2],
+    [2, -1, 1, 0, 0, 1, -1, 2],
+    [-3, -4, -1, -1, -1, -1, -4, -3],
+    [4, -3, 2, 2, 2, 2, -3, 4]]
+
+WEIGHT_SETS = [
+    [200, -2, 10, 150, 50, 0],  # EARLY
+    [200, 1, 10, 150, 50, 0],  # MIDDLE
+    [200, 20, 5, 150, 20, 0],  # 57
+    [200, 30, 5, 150, 20, 0],  # 58
+    [200, 50, 5, 150, 20, 0],  # 59
+    [200, 60, 5, 150, 0, 0],  # 60
+    [200, 80, 0, 150, 0, 0],  # 61
+    [200, 100, 0, 0, 0, 0],  # 62
+    [100, 150, 0, 0, 0, 0],  # 63
+    [0, 150, 0, 0, 0, 0]  # 64
+]  # [corner heu, piece count, mobility, stability, static weights, frontier]
 
 
 class myAgent(Agent):
     def __init__(self, _id):
         super().__init__(_id)
-        self.depth = 3
+        self.depth = DEPTH
         self.agent_id = _id
         self.stabilityMatrix = None
+        self.boardtime = 4
 
     def SelectAction(self, actions, game_state):
         actions = list(set(actions))
+        self.boardtime = getTotalNumOfPieces(game_state)
         return self.minimax(self.depth, self.agent_id, game_state, actions, -math.inf, math.inf, 0)[1]
 
     def minimax(self, depth, currentPlayer, game_state, actions, alpha, beta, mobilityHeuValue):
@@ -70,9 +93,18 @@ class myAgent(Agent):
             return minEval
 
     def evaluation(self, game_state, weights, mobilityHeuValue):
-        return weights[0] * self.cornerHeuristic(game_state) \
-               + weights[1] * self.pieceCountHeuristic(game_state) \
-               + weights[2] * mobilityHeuValue + weights[3] * self.stabilityHeuristic(game_state)
+        pieceCountHeuValue, staticWeightHeuValue, frontierHeuValue = \
+            self.countPieceCountAndStaticWeightsAndFrontierHeuristics(game_state)
+
+        corner = weights[0] * self.cornerHeuristic(game_state)
+        counts = weights[1] * pieceCountHeuValue
+        mobility = weights[2] * mobilityHeuValue
+        stability = weights[3] * self.stabilityHeuristic(game_state)
+        sw = weights[4] * staticWeightHeuValue
+        frontier = weights[5] * frontierHeuValue
+        total = corner + counts + mobility + stability + sw + frontier
+
+        return total
 
     def mobilityHeuristic(self, mobility, mobility_op):
         if (mobility + mobility_op) != 0:
@@ -104,57 +136,46 @@ class myAgent(Agent):
         if game_state.board[GRID_SIZE - 1][GRID_SIZE - 1] == game_state.agent_colors[op_agent_id]:
             opCornersCaptured += 1
 
-        if (cornersCaptured + opCornersCaptured) != 0:
-            return 100 * (cornersCaptured - opCornersCaptured) / (cornersCaptured + opCornersCaptured)
-        else:
-            return 0
-
-    def pieceCountHeuristic(self, game_state):
-        score, opScore = countScoreForBoth(game_state.board, GRID_SIZE, game_state.agent_colors[self.agent_id])
-
-        return 100 * (score - opScore) / (score + opScore)  # denominator always != 0 because of the game initialisation
+        return 25 * (cornersCaptured - opCornersCaptured)
 
     def selectWeightSet(self, curr_board_time):
         """
-        Dynamically changing the weights based on the
+        Dynamically change the weights based on the
         current board situation (time), measured in
         the number of pieces on the board.
         """
-        weight_sets = [
-            [100, -10, 5, 20],  # EARLY
-            [100, 5, 5, 15],  # MIDDLE
-            [100, 20, 5, 10],  # 57
-            [100, 35, 5, 0],   # 58
-            [100, 50, 3, 0],  # 59
-            [100, 60, 3, 0],  # 60
-            [100, 65, 3, 0],  # 61
-            [100, 70, 3, 0],  # 62
-            [100, 150, 0, 0],  # 63
-            [0, 150, 0, 0]  # 64
-        ]  # [corner heu, piece count, mobility]
-
         if curr_board_time < EARLY_GAME_THRESHOLD:
-            return weight_sets[0]
+            return WEIGHT_SETS[0]
         elif curr_board_time < LATE_GAME_THRESHOLD:
-            return weight_sets[1]
+            return WEIGHT_SETS[1]
         elif curr_board_time == LATE_GAME_THRESHOLD:
-            return weight_sets[2]
+            return WEIGHT_SETS[2]
         elif curr_board_time == LATE_GAME_THRESHOLD + 1:
-            return weight_sets[3]
+            return WEIGHT_SETS[3]
         elif curr_board_time == LATE_GAME_THRESHOLD + 2:
-            return weight_sets[4]
+            return WEIGHT_SETS[4]
         elif curr_board_time == LATE_GAME_THRESHOLD + 3:
-            return weight_sets[5]
+            return WEIGHT_SETS[5]
         elif curr_board_time == LATE_GAME_THRESHOLD + 4:
-            return weight_sets[6]
+            return WEIGHT_SETS[6]
         elif curr_board_time == LATE_GAME_THRESHOLD + 5:
-            return weight_sets[7]
+            return WEIGHT_SETS[7]
         elif curr_board_time == LATE_GAME_THRESHOLD + 6:
-            return weight_sets[8]
+            return WEIGHT_SETS[8]
         else:  # curr_board_time == 64
-            return weight_sets[9]
+            return WEIGHT_SETS[9]
 
     def calcStability(self, game_state, player):
+        """
+        Starting from the corners, assess their neighbors, propagate around.
+        A location is stable if all four directions have adjacent stable pieces.
+
+        All stable pieces will be counted. As even if one location isn't
+        marked as stable due to the sequence of its stable neighbors haven't
+        been assessed, when its stable neighbors being assessed, that location
+        will be assessed again as a different neighbor.
+        """
+
         def isStableHorizontal(disc, stabilityMatrix1):
             if disc[1] in [0, GRID_SIZE - 1]:
                 return True
@@ -191,10 +212,11 @@ class myAgent(Agent):
 
         stablePieces = 0
         stabilityMatrix = [[False for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
-        processingList = []
+        processingList = []  # store stable pieces, popped later to assess their neighbors
 
         for i in [0, GRID_SIZE - 1]:
             for j in [0, GRID_SIZE - 1]:
+                """Starting from the corners, only corners are immediate stable."""
                 if game_state.board[i][j] == game_state.agent_colors[player]:
                     stabilityMatrix[i][j] = True
                     processingList.append((i, j))
@@ -204,6 +226,10 @@ class myAgent(Agent):
             pos = processingList.pop(0)
 
             for direction in DIRECTIONS:
+                """
+                For each neighbor.
+                (Please NOTE*: x and y are inverse, i.e., x is actually row, y is column.)
+                """
                 x, y = tuple(map(operator.add, pos, direction))
 
                 if not validPos((x, y)):
@@ -227,110 +253,77 @@ class myAgent(Agent):
         stability = self.calcStability(game_state, self.agent_id)
         stability_op = self.calcStability(game_state, getNextAgentIndex(self.agent_id))
 
-        if stability + stability_op != 0:
-            return 100 * (stability - stability_op) / (stability + stability_op)
-        else:
-            return 0
+        return stability - stability_op  # ranges from -64 to 64
 
+    def countPieceCountAndStaticWeightsAndFrontierHeuristics(self, game_state):
+        score = 0
+        op_score = 0
+        weight = 0
+        op_weight = 0
+        frontier = 0
+        op_frontier = 0
 
-def generateSuccessor(game_state, action, agent_id):
-    if action == "Pass":
-        return game_state
-    else:
-        next_state = copy.deepcopy(game_state)
-        update_color = game_state.agent_colors[agent_id]
-        next_state.board[action[0]][action[1]] = update_color
-        # iterate over all 8 directions and check pieces that require updates
-        for direction in DIRECTIONS:
-            cur_pos = (action[0] + direction[0], action[1] + direction[1])
-            update_list = list()
-            flag = False
-            # Only searching for updates if the next piece in the direction is from the agent's opponent
-            # if next_state.board[cur_pos[0]][cur_pos[1]] == self.agent_colors[(agent_id+1)%2]:
-            while validPos(cur_pos) and next_state.board[cur_pos[0]][cur_pos[1]] != Cell.EMPTY:
-                if next_state.board[cur_pos[0]][cur_pos[1]] == update_color:
-                    flag = True
-                    break
-                update_list.append(cur_pos)
-                cur_pos = (cur_pos[0] + direction[0], cur_pos[1] + direction[1])
-            if flag and len(update_list) != 0:
-                for i, j in update_list:
-                    next_state.board[i][j] = update_color
-        return next_state
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                if game_state.board[row][col] == game_state.agent_colors[self.agent_id]:
+                    score += 1
+                    weight += INIT_STATIC_WEIGHTS[row][col]
 
+                    for direction in DIRECTIONS:
+                        neighbor = (row + direction[0], col + direction[1])
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            frontier += 1
+                elif game_state.board[row][col] == game_state.agent_colors[1 - self.agent_id]:
+                    op_score += 1
+                    op_weight += INIT_STATIC_WEIGHTS[row][col]
 
-def gameEnds(game_state):
-    if getLegalActions(game_state, 0) == ["Pass"] \
-            and getLegalActions(game_state, 1) == ["Pass"]:
-        return True
-    else:
-        return False
+                    for direction in DIRECTIONS:
+                        neighbor = (row + direction[0], col + direction[1])
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            op_frontier += 1
 
+        """denominator always != 0 because of the game initialisation"""
+        piece_count_heu = 100 * (score - op_score) / (score + op_score)
 
-def getLegalActions(game_state, agent_id):
-    actions = []
-    # print(f"Current game state: \n{boardToString(game_state.board,GRID_SIZE)}")
-    for x in range(GRID_SIZE):
-        for y in range(GRID_SIZE):
-            if game_state.board[x][y] == Cell.EMPTY:
-                pos = (x, y)
-                appended = False
+        static_weight_heu = weight - op_weight
 
-                for direction in DIRECTIONS:
-                    if appended:
-                        break
+        frontier_heu = 100 * (op_frontier - frontier) / (frontier + op_frontier) if frontier + op_frontier != 0 else 0
 
-                    temp_pos = tuple(map(operator.add, pos, direction))
-                    if validPos(temp_pos) and game_state.getCell(temp_pos) != Cell.EMPTY and game_state.getCell(
-                            temp_pos) != game_state.agent_colors[agent_id]:
-                        while validPos(temp_pos):
-                            if game_state.getCell(temp_pos) == Cell.EMPTY:
-                                break
-                            if game_state.getCell(temp_pos) == game_state.agent_colors[agent_id]:
-                                actions.append(pos)
-                                appended = True
-                                break
-                            temp_pos = tuple(map(operator.add, temp_pos, direction))
+        return piece_count_heu, static_weight_heu, frontier_heu
 
-    if len(actions) == 0:
-        actions.append("Pass")
-    return actions
+    def staticWeightsHeuristic(self, game_state):
+        weight = 0
+        op_weight = 0
 
+        for i in range(GRID_SIZE):
+            for j in range(GRID_SIZE):
+                if game_state.board[i][j] == game_state.agent_colors[self.agent_id]:
+                    weight += INIT_STATIC_WEIGHTS[i][j]
+                elif game_state.board[i][j] == game_state.agent_colors[1 - self.agent_id]:
+                    op_weight += INIT_STATIC_WEIGHTS[i][j]
 
-def validPos(pos):
-    x, y = pos
-    return 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE
+        return weight - op_weight
 
+    def pieceCountHeuristic(self, game_state):
+        score, opScore = countScoreForBoth(game_state.board, GRID_SIZE, game_state.agent_colors[self.agent_id])
 
-def getNextAgentIndex(agent_id):
-    return (agent_id + 1) % 2
+        return 100 * (score - opScore) / (score + opScore)  # denominator always != 0 because of the game initialisation
 
+    def frontierHeuristic(self, game_state):
+        frontier = 0
+        op_frontier = 0
 
-def getTotalNumOfPieces(game_state):
-    """
-    Returns the total number of
-    pieces on the board in the current
-    game state.
-    """
-    count = 0
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                if game_state.board[row][col] == game_state.agent_colors[self.agent_id]:
+                    for direction in DIRECTIONS:
+                        neighbor = tuple(map(operator.add, (row, col), direction))
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            frontier += 1
+                elif game_state.board[row][col] == game_state.agent_colors[1 - self.agent_id]:
+                    for direction in DIRECTIONS:
+                        neighbor = tuple(map(operator.add, (row, col), direction))
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            op_frontier += 1
 
-    for i in range(GRID_SIZE):
-        for j in range(GRID_SIZE):
-            if game_state.board[i][j] != Cell.EMPTY:
-                count += 1
-
-    return count
-
-
-def countScoreForBoth(board, grid_size, player_color):
-    score = 0
-    opScore = 0
-    for i in range(grid_size):
-        for j in range(grid_size):
-            if board[i][j] == player_color:
-                score += 1
-            elif board[i][j] != Cell.EMPTY:
-                """Opponent color"""
-                opScore += 1
-
-    return score, opScore
+        return 100 * (op_frontier - frontier) / (frontier + op_frontier) if frontier + op_frontier != 0 else 0
