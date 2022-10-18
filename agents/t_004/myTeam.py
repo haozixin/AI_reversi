@@ -106,9 +106,6 @@ class myAgent(Agent):
         frontier = weights[5] * frontierHeuValue
         total = corner + counts + mobility + stability + sw + frontier
 
-        msg = "Board time: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, frontier: {}, total: {}".format(self.boardtime, corner, counts, mobility, stability, sw, frontier, total)
-        print(msg)
-
         return total
 
     def mobilityHeuristic(self, mobility, mobility_op):
