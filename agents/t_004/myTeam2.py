@@ -148,25 +148,25 @@ class myAgent(Agent):
         the number of pieces on the board.
         """
         if curr_board_time < EARLY_GAME_THRESHOLD:
-            return WEIGHT_SETS[0]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 10]
         elif curr_board_time < LATE_GAME_THRESHOLD:
-            return WEIGHT_SETS[1]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 9]
         elif curr_board_time == LATE_GAME_THRESHOLD:
-            return WEIGHT_SETS[2]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 8]
         elif curr_board_time == LATE_GAME_THRESHOLD + 1:
-            return WEIGHT_SETS[3]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 7]
         elif curr_board_time == LATE_GAME_THRESHOLD + 2:
-            return WEIGHT_SETS[4]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 6]
         elif curr_board_time == LATE_GAME_THRESHOLD + 3:
-            return WEIGHT_SETS[5]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 5]
         elif curr_board_time == LATE_GAME_THRESHOLD + 4:
-            return WEIGHT_SETS[6]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 4]
         elif curr_board_time == LATE_GAME_THRESHOLD + 5:
-            return WEIGHT_SETS[7]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 3]
         elif curr_board_time == LATE_GAME_THRESHOLD + 6:
-            return WEIGHT_SETS[8]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 2]
         else:  # curr_board_time == 64
-            return WEIGHT_SETS[9]
+            return WEIGHT_SETS[len(WEIGHT_SETS) - 1]
 
     def calcStability(self, game_state, player):
         """
