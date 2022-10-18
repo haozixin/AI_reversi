@@ -20,17 +20,17 @@ INIT_STATIC_WEIGHTS = [
     [4, -3, 2, 2, 2, 2, -3, 4]]
 
 WEIGHT_SETS = [
-    [200, -2, 10, 20, 50],  # EARLY
-    [200, 1, 10, 20, 50],  # MIDDLE
-    [200, 20, 5, 20, 20],  # 57
-    [200, 30, 5, 20, 20],  # 58
-    [200, 50, 5, 20, 20],  # 59
-    [200, 60, 5, 20, 0],  # 60
-    [200, 80, 0, 20, 0],  # 61
-    [200, 100, 0, 0, 0],  # 62
-    [100, 150, 0, 0, 0],  # 63
-    [0, 150, 0, 0, 0]  # 64
-]  # [corner heu, piece count, mobility, stability, static weights]
+    [200, -2, 10, 150, 50, 10],  # EARLY
+    [200, 1, 10, 150, 50, 15],  # MIDDLE
+    [200, 20, 5, 150, 20, 15],  # 57
+    [200, 30, 5, 150, 20, 15],  # 58
+    [200, 50, 5, 150, 20, 0],  # 59
+    [200, 60, 5, 150, 0, 0],  # 60
+    [200, 80, 0, 150, 0, 0],  # 61
+    [200, 100, 0, 0, 0, 0],  # 62
+    [100, 150, 0, 0, 0, 0],  # 63
+    [0, 150, 0, 0, 0, 0]  # 64
+]  # [corner heu, piece count, mobility, stability, static weights, frontier]
 
 
 class myAgent(Agent):
@@ -100,9 +100,10 @@ class myAgent(Agent):
         mobility = weights[2] * mobilityHeuValue
         stability = weights[3] * self.stabilityHeuristic(game_state)
         sw = weights[4] * self.staticWeightsHeuristic(game_state)
-        total = corner + counts + mobility + stability + sw
+        frontier = weights[5] * self.frontierHeuristic(game_state)
+        total = corner + counts + mobility + stability + sw + frontier
 
-        msg = "Board time: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, total: {}".format(self.boardtime, corner, counts, mobility, stability, sw, total)
+        #msg = "Board time: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, frontier: {}, total: {}".format(self.boardtime, corner, counts, mobility, stability, sw, frontier, total)
         #print(msg)
 
         return total
@@ -259,10 +260,7 @@ class myAgent(Agent):
         stability = self.calcStability(game_state, self.agent_id)
         stability_op = self.calcStability(game_state, getNextAgentIndex(self.agent_id))
 
-        if stability + stability_op != 0:
-            return 100 * (stability - stability_op) / (stability + stability_op)
-        else:
-            return 0
+        return stability - stability_op  # ranges from -64 to 64
 
     def staticWeightsHeuristic(self, game_state):
         weight_table = INIT_STATIC_WEIGHTS
@@ -278,6 +276,24 @@ class myAgent(Agent):
 
         return weight - op_weight
 
+    def frontierHeuristic(self, game_state):
+        frontier = 0
+        op_frontier = 0
+
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                if game_state.board[row][col] == game_state.agent_colors[self.agent_id]:
+                    for direction in DIRECTIONS:
+                        neighbor = tuple(map(operator.add, (row, col), direction))
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            frontier += 1
+                elif game_state.board[row][col] == game_state.agent_colors[1 - self.agent_id]:
+                    for direction in DIRECTIONS:
+                        neighbor = tuple(map(operator.add, (row, col), direction))
+                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                            op_frontier += 1
+
+        return 100 * (op_frontier - frontier) / (frontier + op_frontier) if frontier + op_frontier != 0 else 0
 
 def generateSuccessor(game_state, action, agent_id):
     if action == "Pass":
@@ -380,3 +396,5 @@ def countScoreForBoth(board, grid_size, player_color):
                 opScore += 1
 
     return score, opScore
+
+
