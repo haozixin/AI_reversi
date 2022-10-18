@@ -55,11 +55,10 @@ class Node:
 
 
 class MCTS:
-    def __init__(self, mdp, qfunction, bandit, node_visits):
+    def __init__(self, mdp, qfunction, bandit):
         self.mdp = mdp
         self.qfunction = qfunction
         self.bandit = bandit
-        Node.visits = node_visits
     """
     Execute the MCTS algorithm from the initial state given, with timeout in seconds
     """

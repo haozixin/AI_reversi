@@ -1,14 +1,13 @@
 import copy
 import operator
 from collections import namedtuple
-
 from Reversi.reversi_utils import GRID_SIZE, Cell
 
 USE_CSV = True  # use csv file to initialize the q_table and visits
 _ERS = namedtuple("EmbeddedReversiState", "board agent_id")
 
-DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 DISCOUNT_FACTOR = 0.9
+DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
 
 class EmbeddedReversiState(_ERS):
