@@ -18,13 +18,13 @@ INIT_STATIC_WEIGHTS = [
     [4, -3, 2, 2, 2, 2, -3, 4]]
 
 WEIGHT_SETS = [
-    [200, -2, 10, 20, 50],  # EARLY
-    [200, 1, 10, 20, 50],  # MIDDLE
-    [200, 20, 5, 20, 20],  # 57
-    [200, 30, 5, 20, 20],  # 58
-    [200, 50, 5, 20, 20],  # 59
-    [200, 60, 5, 20, 0],  # 60
-    [200, 80, 0, 20, 0],  # 61
+    [200, -2, 10, 150, 50],  # EARLY
+    [200, 1, 10, 150, 50],  # MIDDLE
+    [200, 20, 5, 150, 20],  # 57
+    [200, 30, 5, 150, 20],  # 58
+    [200, 50, 5, 150, 20],  # 59
+    [200, 60, 5, 150, 0],  # 60
+    [200, 80, 0, 150, 0],  # 61
     [200, 100, 0, 0, 0],  # 62
     [100, 150, 0, 0, 0],  # 63
     [0, 150, 0, 0, 0]  # 64
@@ -257,10 +257,7 @@ class myAgent(Agent):
         stability = self.calcStability(game_state, self.agent_id)
         stability_op = self.calcStability(game_state, getNextAgentIndex(self.agent_id))
 
-        if stability + stability_op != 0:
-            return 100 * (stability - stability_op) / (stability + stability_op)
-        else:
-            return 0
+        return stability - stability_op  # ranges from -64 to 64
 
     def staticWeightsHeuristic(self, game_state):
         weight_table = INIT_STATIC_WEIGHTS
