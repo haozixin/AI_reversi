@@ -9,6 +9,8 @@ _ERS = namedtuple("EmbeddedReversiState", "board agent_id")
 
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 DISCOUNT_FACTOR = 0.9
+
+
 class EmbeddedReversiState(_ERS):
     def getBoard(self):
         return self.board

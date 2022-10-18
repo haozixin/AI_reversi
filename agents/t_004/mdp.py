@@ -1,7 +1,4 @@
-import copy
-import operator
 from abc import abstractmethod
-from Reversi.reversi_utils import GRID_SIZE, Cell
 from agents.t_004.myTeam_utils import *
 
 
