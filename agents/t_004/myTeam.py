@@ -5,6 +5,7 @@ from agents.t_004.myTeam_utils import *
 
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 DEPTH = 3
+MID_GAME = 32
 EARLY_GAME_THRESHOLD = 28
 LATE_GAME_THRESHOLD = 57
 INIT_STATIC_WEIGHTS = [
@@ -36,12 +37,11 @@ class myAgent(Agent):
         super().__init__(_id)
         self.depth = DEPTH
         self.agent_id = _id
-        self.stabilityMatrix = None
-        self.boardtime = 4
+        self.estimated_board_time = 4
 
     def SelectAction(self, actions, game_state):
         actions = list(set(actions))
-        self.boardtime = getTotalNumOfPieces(game_state)
+        self.estimated_board_time = getTotalNumOfPieces(game_state) + self.depth
         return self.minimax(self.depth, self.agent_id, game_state, actions, -math.inf, math.inf, 0)[1]
 
     def minimax(self, depth, currentPlayer, game_state, actions, alpha, beta, mobilityHeuValue):
@@ -104,7 +104,7 @@ class myAgent(Agent):
         frontier = weights[5] * frontierHeuValue
         total = corner + counts + mobility + stability + sw + frontier
 
-        msg = "Board time: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, frontier: {}, total: {}".format(self.boardtime, corner, counts, mobility, stability, sw, frontier, total)
+        msg = "Board time: {}, Corner: {}, Counts: {}, mobility: {}, stability: {}, static weights: {}, frontier: {}, total: {}".format(self.estimated_board_time, corner, counts, mobility, stability, sw, frontier, total)
         print(msg)
 
         return total
@@ -272,18 +272,31 @@ class myAgent(Agent):
                     score += 1
                     weight += INIT_STATIC_WEIGHTS[row][col]
 
-                    for direction in DIRECTIONS:
-                        neighbor = tuple(map(operator.add, (row, col), direction))
-                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
-                            frontier += 1
+                    if self.estimated_board_time <= MID_GAME:
+                        for direction in DIRECTIONS:
+                            neighbor = (row + direction[0], col + direction[1])
+                            if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                                frontier += 1
                 elif game_state.board[row][col] == game_state.agent_colors[1 - self.agent_id]:
                     op_score += 1
                     op_weight += INIT_STATIC_WEIGHTS[row][col]
 
-                    for direction in DIRECTIONS:
-                        neighbor = tuple(map(operator.add, (row, col), direction))
-                        if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
-                            op_frontier += 1
+                    if self.estimated_board_time <= MID_GAME:
+                        for direction in DIRECTIONS:
+                            neighbor = (row + direction[0], col + direction[1])
+                            if validPos(neighbor) and game_state.board[neighbor[0]][neighbor[1]] == Cell.EMPTY:
+                                op_frontier += 1
+                else:
+                    if self.estimated_board_time > MID_GAME:
+                        for direction in DIRECTIONS:
+                            neighbor = (row + direction[0], col + direction[1])
+                            if validPos(neighbor):
+                                if game_state.board[neighbor[0]][neighbor[1]] == \
+                                        game_state.agent_colors[self.agent_id]:
+                                    frontier += 1
+                                elif game_state.board[neighbor[0]][neighbor[1]] == \
+                                        game_state.agent_colors[1 - self.agent_id]:
+                                    op_frontier += 1
 
         """denominator always != 0 because of the game initialisation"""
         piece_count_heu = 100 * (score - op_score) / (score + op_score)
