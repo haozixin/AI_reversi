@@ -52,5 +52,3 @@ class QTable(QFunction):
 
         # self.qtable = df.to_dict(orient='index')
         return self
-
-

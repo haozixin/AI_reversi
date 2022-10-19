@@ -18,7 +18,6 @@ else:
 counter = 0
 
 
-
 class myAgent(Agent):
 
     def __init__(self, _id):
@@ -35,7 +34,6 @@ class myAgent(Agent):
         ucb = ModifiedUpperConfidenceBounds()
         single_agent_mcts = SingleAgentMCTS(mdp, qTabel, ucb)
         single_agent_mcts.mcts()
-
 
         # if the game is over, save the qtable to a csv file
         print(qTabel.qtable)
