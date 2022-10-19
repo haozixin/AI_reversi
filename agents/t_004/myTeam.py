@@ -41,6 +41,7 @@ class myAgent(Agent):
 
     def SelectAction(self, actions, game_state):
         actions = list(set(actions))
+        print("Length of actions: ", len(actions))
         self.estimated_board_time = getTotalNumOfPieces(game_state) + self.depth
         return self.minimax(self.depth, self.agent_id, game_state, actions, -math.inf, math.inf, 0)[1]
 
