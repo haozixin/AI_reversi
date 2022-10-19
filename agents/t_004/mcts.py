@@ -4,13 +4,28 @@ import time
 import random
 from collections import defaultdict
 from Reversi.reversi_utils import GRID_SIZE
+import pandas as pd
+from agents.t_004.myTeam_utils import USE_CSV, V_FILE_PATH
 
-TIMEOUT = 0.975
+TIMEOUT = 0.9
 
 
 class Node:
     # Records the number of times states have been visited
-    visits = defaultdict(lambda: 0)
+    if USE_CSV:
+        # read the csv file
+        df = pd.read_csv(V_FILE_PATH, index_col=0)
+        # convert the dataframe to dictionary (defaultdict)
+        # default value is 0
+        df.reset_index(inplace=True)
+        key = df["index"]
+        values = df["0"].apply(lambda x: float(x))
+        data = dict(zip(key, values))
+
+        visits = defaultdict(lambda: 0.0, data)
+        # visits = defaultdict(lambda: 0)
+    else:
+        visits = defaultdict(lambda: 0)
 
     def __init__(self, mdp, parent, state, qfunction, bandit, reward=0.0, action=None):
         self.mdp = mdp
@@ -30,26 +45,31 @@ class Node:
         self.action = action
 
     """ Select a node that is not fully expanded """
+
     def select(self):
         utils.raiseNotDefined()
         pass
 
     """ Expand a node if it is not a terminal node """
+
     def expand(self):
         utils.raiseNotDefined()
         pass
 
     """ Backpropogate the reward back to the parent node """
+
     def back_propagate(self, reward, child):
         utils.raiseNotDefined()
         pass
 
     """ Return the value of this node """
+
     def get_value(self):
         utils.raiseNotDefined()
         pass
 
     """ Get the number of visits to this state """
+
     def get_visits(self):
         return Node.visits[self.state]
 
@@ -59,9 +79,11 @@ class MCTS:
         self.mdp = mdp
         self.qfunction = qfunction
         self.bandit = bandit
+
     """
     Execute the MCTS algorithm from the initial state given, with timeout in seconds
     """
+
     # MCTS rollout
     def mcts(self, timeout=TIMEOUT, root_node=None):
         if root_node is None:
@@ -81,11 +103,13 @@ class MCTS:
         return root_node
 
     """ Create a root node representing an initial state """
+
     def create_root_node(self):
         utils.raiseNotDefined()
         pass
 
     """ Choose a random action. Heuristics can be used here to improve simulations."""
+
     # TODO: Implement a better action selection heuristic
     def choose(self, state, agent_id):
         actions = self.mdp.get_actions(state, agent_id)
@@ -97,6 +121,7 @@ class MCTS:
         return random.choice(actions)
 
     """ Simulate until a terminal state """
+
     def simulate(self, node):
         state = node.state
         cumulative_reward = 0.0
@@ -117,4 +142,3 @@ class MCTS:
             current_agent = 1 - current_agent
 
         return cumulative_reward
-
