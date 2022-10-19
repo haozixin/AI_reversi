@@ -7,7 +7,7 @@ from agents.t_004.myTeam_utils import *
 from template import Agent
 import pandas as pd
 
-USE_CSV = True
+
 if USE_CSV:
     qTabel = QTable().initial_q_table(Q_FILE_PATH)
 else:
