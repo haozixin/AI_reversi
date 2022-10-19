@@ -1,7 +1,4 @@
-import operator
-from collections import defaultdict
 
-from Reversi.reversi_utils import GRID_SIZE, Cell
 from agents.t_004.bandit import ModifiedUpperConfidenceBounds
 from agents.t_004.mdp import Reversi_MDP
 from agents.t_004.qtable import QTable

@@ -6,22 +6,31 @@ from agents.t_004.myTeam_utils import *
 from template import Agent
 
 
+USE_CSV = False
+if USE_CSV:
+    qTabel = QTable().initial_q_table(Q_FILE_PATH)
+    # Node.visits will be set in mcts.py (Node class)
+else:
+    qTabel = QTable()
+    # Node.visits will be initialized in mcts.py (Node class)
+
+
 class myAgent(Agent):
+
     def __init__(self, _id):
         super().__init__(_id)
         self.agent_id = _id
-        self.qfunction = QTable()
 
     def SelectAction(self, actions, game_state):
         actions = list(set(actions))
         static_game_state = embedReversiState(game_state, self.agent_id)
+
         mdp = Reversi_MDP(self.agent_id, game_state, actions)
-        single_agent_mcts = SingleAgentMCTS(mdp, self.qfunction, ModifiedUpperConfidenceBounds())
+        ucb = ModifiedUpperConfidenceBounds()
+        single_agent_mcts = SingleAgentMCTS(mdp, qTabel, ucb)
         single_agent_mcts.mcts()
 
-        return max([(action, self.qfunction.get_q_value(static_game_state, action))
+        return max([(action, qTabel.get_q_value(static_game_state, action))
                     for action in actions], key=lambda x: x[1])[0]
-
-
 
 
