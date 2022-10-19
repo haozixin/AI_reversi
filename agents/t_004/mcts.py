@@ -4,13 +4,28 @@ import time
 import random
 from collections import defaultdict
 from Reversi.reversi_utils import GRID_SIZE
+import pandas as pd
+from agents.t_004.myTeam_utils import USE_CSV, V_FILE_PATH
 
-TIMEOUT = 0.975
+TIMEOUT = 0.9
 
 
 class Node:
     # Records the number of times states have been visited
-    visits = defaultdict(lambda: 0)
+    if USE_CSV:
+        # read the csv file
+        df = pd.read_csv(V_FILE_PATH, index_col=0)
+        # convert the dataframe to dictionary (defaultdict)
+        # default value is 0
+        df.reset_index(inplace=True)
+        key = df["index"]
+        values = df["0"].apply(lambda x: float(x))
+        data = dict(zip( key, values))
+
+        visits = defaultdict(lambda: 0.0, data)
+        # visits = defaultdict(lambda: 0)
+    else:
+        visits = defaultdict(lambda: 0)
 
     def __init__(self, mdp, parent, state, qfunction, bandit, reward=0.0, action=None):
         self.mdp = mdp
@@ -54,12 +69,13 @@ class Node:
         return Node.visits[self.state]
 
 
+
 class MCTS:
-    def __init__(self, mdp, qfunction, bandit, node_visits):
+    def __init__(self, mdp, qfunction, bandit):
         self.mdp = mdp
         self.qfunction = qfunction
         self.bandit = bandit
-        Node.visits = node_visits
+
     """
     Execute the MCTS algorithm from the initial state given, with timeout in seconds
     """
