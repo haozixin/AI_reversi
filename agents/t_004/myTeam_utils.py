@@ -6,7 +6,7 @@ from Reversi.reversi_utils import GRID_SIZE, Cell
 USE_CSV = True  # use csv file to initialize the q_table and visits
 _ERS = namedtuple("EmbeddedReversiState", "board agent_id")
 
-DISCOUNT_FACTOR = 0.9
+DISCOUNT_FACTOR = 0.96
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
 
