@@ -3,12 +3,13 @@ import random
 
 
 class MultiArmedBandit:
-
     """ Select an action for this state given from a list given a Q-function """
+
     def select(self, state, agent_id, actions, qfunction, node_visits, maximising):
         pass
 
     """ Reset a multi-armed bandit to its initial configuration """
+
     def reset(self):
         self.__init__()
 
@@ -53,4 +54,3 @@ class ModifiedUpperConfidenceBounds(MultiArmedBandit):
         result = random.choice(best_actions)
 
         return result
-

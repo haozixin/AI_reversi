@@ -5,8 +5,6 @@ from agents.t_004.single_agent_mcts import *
 from agents.t_004.myTeam_utils import *
 from template import Agent
 
-
-
 if USE_CSV:
     qTabel = QTable().initial_q_table(Q_FILE_PATH)
     # Node.visits will be set in mcts.py (Node class)
@@ -32,5 +30,3 @@ class myAgent(Agent):
 
         return max([(action, qTabel.get_q_value(static_game_state, action))
                     for action in actions], key=lambda x: x[1])[0]
-
-

@@ -11,6 +11,7 @@ class myAgent(Agent):
     """
     The agent won't use csv file to load qtable
     """
+
     def __init__(self, _id):
         super().__init__(_id)
         self.agent_id = _id
@@ -28,7 +29,3 @@ class myAgent(Agent):
 
         return max([(action, self.qfunction.get_q_value(static_game_state, action))
                     for action in actions], key=lambda x: x[1])[0]
-
-
-
-

@@ -11,7 +11,7 @@ class QTable(QFunction):
         self.qtable[(state, action)] = self.qtable[(state, action)] + delta
 
     def get_q_value(self, state, action):
-        return self.qtable[(state,  action)]
+        return self.qtable[(state, action)]
 
     def initial_q_table(self, filename):
         """

@@ -2,7 +2,6 @@ import math
 from template import Agent
 from agents.t_004.myTeam_utils import *
 
-
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 DEPTH = 3
 EARLY_GAME_THRESHOLD = 28

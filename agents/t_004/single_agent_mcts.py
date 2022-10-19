@@ -5,15 +5,15 @@ from agents.t_004.myTeam_utils import *
 
 class SingleAgentNode(Node):
     def __init__(
-        self,
-        mdp,
-        parent,
-        state,
-        qfunction,
-        bandit,
-        agent_id,
-        reward=0.0,
-        action=None
+            self,
+            mdp,
+            parent,
+            state,
+            qfunction,
+            bandit,
+            agent_id,
+            reward=0.0,
+            action=None
     ):
         super().__init__(mdp, parent, state, qfunction, bandit, reward, action)
 
@@ -22,6 +22,7 @@ class SingleAgentNode(Node):
         self.children = {}
 
     """ Return true if and only if all child actions have been expanded """
+
     def is_fully_expanded(self):
         valid_actions = self.mdp.get_actions(self.state, self.agent_id)
         if len(valid_actions) == len(self.children):
@@ -30,6 +31,7 @@ class SingleAgentNode(Node):
             return False
 
     """ Select a node that is not fully expanded """
+
     def select(self):
         if not self.is_fully_expanded() or self.mdp.is_terminal(self.state):
             return self
@@ -41,6 +43,7 @@ class SingleAgentNode(Node):
             return self.get_outcome_child(action).select()
 
     """ Expand a node if it is not a terminal node """
+
     def expand(self):
         if not self.mdp.is_terminal(self.state):
             # Randomly select an unexpanded action to expand
@@ -52,6 +55,7 @@ class SingleAgentNode(Node):
         return self
 
     """ Back propagate the reward back to the parent node """
+
     def back_propagate(self, reward, child):
         action = child.action
 
@@ -61,7 +65,7 @@ class SingleAgentNode(Node):
         Node.visits[(embeddedState, action)] += 1
 
         delta = (1 / (Node.visits[(embeddedState, action)])) * (
-            reward - self.qfunction.get_q_value(embeddedState, action)
+                reward - self.qfunction.get_q_value(embeddedState, action)
         )
         self.qfunction.update(embeddedState, action, delta)
 
@@ -69,6 +73,7 @@ class SingleAgentNode(Node):
             self.parent.back_propagate(self.reward + reward, self)
 
     """ Simulate the outcome of an action, and return the child node """
+
     def get_outcome_child(self, action):
         # Find the corresponding state and return if this already exists
         if self.children[action]:

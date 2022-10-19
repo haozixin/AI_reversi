@@ -1,4 +1,3 @@
-
 from agents.t_004.bandit import ModifiedUpperConfidenceBounds
 from agents.t_004.mdp import Reversi_MDP
 from agents.t_004.qtable import QTable
@@ -6,7 +5,6 @@ from agents.t_004.single_agent_mcts import SingleAgentMCTS, Node
 from agents.t_004.myTeam_utils import *
 from template import Agent
 import pandas as pd
-
 
 if USE_CSV:
     qTabel = QTable().initial_q_table(Q_FILE_PATH)
@@ -36,7 +34,7 @@ class myAgent(Agent):
         print(qTabel.qtable)
         counter += 1
         # out put the qtable to a csv file when the game is around going to the 50th round/ 100th round/ 150th round...
-        if counter in [50*30, 150*30, 200*30, 300*30]:
+        if counter in [50 * 30, 150 * 30, 200 * 30, 300 * 30]:
             update_q_to_csv()
 
         return max([(action, qTabel.get_q_value(static_game_state, action))
@@ -56,15 +54,12 @@ def update_q_to_csv():
     global qTabel
     global counter
 
-# self.qtable[(state, action)]
+    # self.qtable[(state, action)]
 
     df = pd.DataFrame.from_dict(qTabel.qtable, orient='index')
     # under the t_004 folder
-    df.to_csv('./qtable_'+str(int(counter/30))+'.csv')
+    df.to_csv('./qtable_' + str(int(counter / 30)) + '.csv')
 
     # same Node.visits to csv file
     df = pd.DataFrame.from_dict(Node.visits, orient='index')
-    df.to_csv('./Node_visits_'+str(int(counter/30))+'.csv')
-
-
-
+    df.to_csv('./Node_visits_' + str(int(counter / 30)) + '.csv')
