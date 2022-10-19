@@ -20,7 +20,7 @@ class Node:
         df.reset_index(inplace=True)
         key = df["index"]
         values = df["0"].apply(lambda x: float(x))
-        data = dict(zip( key, values))
+        data = dict(zip(key, values))
 
         visits = defaultdict(lambda: 0.0, data)
         # visits = defaultdict(lambda: 0)
@@ -45,29 +45,33 @@ class Node:
         self.action = action
 
     """ Select a node that is not fully expanded """
+
     def select(self):
         utils.raiseNotDefined()
         pass
 
     """ Expand a node if it is not a terminal node """
+
     def expand(self):
         utils.raiseNotDefined()
         pass
 
     """ Backpropogate the reward back to the parent node """
+
     def back_propagate(self, reward, child):
         utils.raiseNotDefined()
         pass
 
     """ Return the value of this node """
+
     def get_value(self):
         utils.raiseNotDefined()
         pass
 
     """ Get the number of visits to this state """
+
     def get_visits(self):
         return Node.visits[self.state]
-
 
 
 class MCTS:
@@ -79,6 +83,7 @@ class MCTS:
     """
     Execute the MCTS algorithm from the initial state given, with timeout in seconds
     """
+
     # MCTS rollout
     def mcts(self, timeout=TIMEOUT, root_node=None):
         if root_node is None:
@@ -98,11 +103,13 @@ class MCTS:
         return root_node
 
     """ Create a root node representing an initial state """
+
     def create_root_node(self):
         utils.raiseNotDefined()
         pass
 
     """ Choose a random action. Heuristics can be used here to improve simulations."""
+
     # TODO: Implement a better action selection heuristic
     def choose(self, state, agent_id):
         actions = self.mdp.get_actions(state, agent_id)
@@ -114,6 +121,7 @@ class MCTS:
         return random.choice(actions)
 
     """ Simulate until a terminal state """
+
     def simulate(self, node):
         state = node.state
         cumulative_reward = 0.0
@@ -134,4 +142,3 @@ class MCTS:
             current_agent = 1 - current_agent
 
         return cumulative_reward
-

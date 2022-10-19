@@ -21,10 +21,7 @@ class myAgent(Agent):
         super().__init__(_id)
         self.agent_id = _id
 
-
     def SelectAction(self, actions, game_state):
-        # global qTabel
-
         actions = list(set(actions))
         static_game_state = embedReversiState(game_state, self.agent_id)
 
