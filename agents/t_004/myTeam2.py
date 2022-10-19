@@ -6,7 +6,7 @@ from agents.t_004.myTeam_utils import *
 from template import Agent
 
 
-USE_CSV = False
+
 if USE_CSV:
     qTabel = QTable().initial_q_table(Q_FILE_PATH)
     # Node.visits will be set in mcts.py (Node class)

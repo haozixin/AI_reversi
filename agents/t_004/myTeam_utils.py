@@ -3,7 +3,7 @@ import operator
 from collections import namedtuple
 from Reversi.reversi_utils import GRID_SIZE, Cell
 
-USE_CSV = False  # use csv file to initialize the q_table and visits
+USE_CSV = True  # use csv file to initialize the q_table and visits
 Q_FILE_PATH = "agents/t_004/qtable_50.csv"  # which file you want to use to initialize the q_table
 V_FILE_PATH = "agents/t_004/Node_visits_50.csv"  # which file you want to use to initialize the visits
 
@@ -11,7 +11,7 @@ V_FILE_PATH = "agents/t_004/Node_visits_50.csv"  # which file you want to use to
 
 DISCOUNT_FACTOR = 0.96
 DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-DISCOUNT_FACTOR = 0.9
+
 # class EmbeddedReversiState(_ERS):
 #
 #
