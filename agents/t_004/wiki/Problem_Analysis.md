@@ -26,7 +26,7 @@
   * [Future improvements](#future-improvements)
 
 ## Problem Analysis
-
+For this problem, 
 
 ## Approach One (Minmax with Alpha-Beta Pruning)
 
@@ -34,13 +34,17 @@
 
 
 ## Approach Two (Monte Carlo Tree Search)
+
+[//]: # (For example, you may want to show how the addition of a given technique or improvement affected your system at some important point in the development.)
+
+[//]: # (However, you can also discuss other aspects, such as other techniques you experimented with &#40;and why they were not used in the final system&#41;, future extensions or improvements on your system, etc.)
 ### Motivation 
 
 
 
-[Back to top](#table-of-contents)
 
 ### Application  
+
 
 [Back to top](#table-of-contents)
 
