@@ -5,25 +5,28 @@
 * Yinghua Zhou - yinghuaz@student.unimelb.edu.au - 1308266
 
 ## Introduction
-In this project, our team "Plan for Plan" implemented two different AI agents to play the Reversi/Othello game. 
-The first method is based on the **minimax algorithm(Alpha-Beta Pruning)**, which is a recursive algorithm that is used to find the optimal move for a player with a strong heuristic, 
-assuming that the opponent also plays optimally. The second method is based on the **Monte Carlo Tree Search**, 
-which is a combination of the minimax algorithm and Monte Carlo Algorithm that is used to find the optimal move for a player, 
-assuming that the opponent plays randomly. The two methods are implemented in the folder `agents.t_004`. 
-The two methods can be loaded in the file `myTeam.py` and `myTeam2.py` separately. 
+In this project, our team "Plan for Plan" implemented two different AI agents for playing the Reversi/Othello game. 
+The first method to describe, and the final method we decided to present is based on the **minimax algorithm(Alpha-Beta Pruning)**, 
+which is a popular AI approach for zero-sum games, that explores all possible actions in different turns of the corresponding 
+player within a pre-defined depth, with the value of a state measured in heuristics based on domain knowledge, while alpha-beta 
+pruning technique is used to avoid redundant calculations. The second method is based on the **Monte Carlo Tree Search (MCTS)**, 
+in which our version basically takes elements from the Minimax algorithm, but focuses on running simulations instead of
+heuristics. The implementation of two AI approaches are under the folder `agents.t_004`. 
+Namely, `myTeam.py` for the Minimax approach, and `myTeam2.py` for the MCTS approach.
 
-This wiki will show you details about the two methods and the experiments we did. There are 4 sections:
+This wiki presents the details regarding the two methods and the relevant experiments we did. The contents are categorised 5 sections:
 1. [Home Page]()
 2. [Approach One](AI-Method-1)
 3. [Approach Two](AI-Method-2)
-4. [Conclusions and Reflections](Conclusions-and-Reflections)
+4. [Problem-Analysis](Problem-Analysis.md)
+5. [Conclusions and Reflections](Conclusions-and-Reflections)
 
-In the next section, we will show you the problem analysis of the two methods and explain which are the techniques that you choose and why.
-To be more specific, our notes about this part of the project includes acknowledgement, comments, strengths and limitations, etc.  We would tell us how you used and how you applied the algorithms in our team.
+The details about the two AI approaches we discovered and implemented are included in Section 2 and Section 3 respectively.
+The content includes our design decisions and strategies used, challenges we faced, evolution and experiments of the two
+approaches respectively (namely how our AI agent evolved and the results for the experiments we did with analysis), 
+the strengths and weaknesses of the specific approach, with lastly the possible future improvements.
 
-In the Evolution and Experiments section, we will show you the experiments we did, the results we got, the evolution of our project and the improvements we made. 
-Clearly show the way to become stronger through descriptions and tables
+We will present on which approach we decided to use as our final agent with the reasons outlined in the *Problem Analysis* Section,
+with some relative comments and discussions.
 
-Some content will be in both section 2 and 3, such as an experimental section that justifies and explains the performance of the approaches implemented, including a table of results comparing the approaches implemented followed by a discussion.
-
-Finally, in the *Conclusions and Reflections* section, we will point out the conclusions we got and the reflections we made. We also described the improvements we can make in the future.
+We will finally conclude our work in the *Conclusions and Reflections* section with reflections on things we learned.
