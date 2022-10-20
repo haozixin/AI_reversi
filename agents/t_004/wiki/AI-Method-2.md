@@ -22,20 +22,20 @@ The Monte Carlo method, a "statistical simulation method", can be used to implem
 ## Application  
 
 In general, the algorithm works by continuously simulating each move until the endgame, and the total number of simulations N for that move, versus the number of wins W, to derive the win rate for that move as W/N. An asymmetric search tree is gradually built by randomly extrapolating the game.
-Monte Carlo is model-free reinforcement learning, which is also consistent with the reality (we do not know how our opponent will land next and the probability) or that the state space is so large that it is difficult for us to describe it.
+Monte Carlo is model-free reinforcement learning, which is also suitable for the reality (we do not know how our opponent will land next and the probability) And sometimes the state space is so large that it is difficult for us to describe it.
 
-Monte Carlo tree search can be roughly divided into four steps. Selection, Expansion, Simulation, and Back Propagation. In this game, each *game_state* is a state.
+Monte Carlo tree search can be roughly divided into four steps. **Selection**, **Expansion**, **Simulation**, and **Back Propagation**. In this game, each *game_state* is a state.
 The _action_ is the set of legal actions for next player, which are represented by the positions (x, y) where the pieces can be placed.
 
-At the beginning, the search tree has only one node, which is the situation we need to decide on. Each node in the search tree contains three basic pieces of information: 1. The situation it represents 2. The number of times it has been visited 3. Its cumulative score. 
+At the beginning, the search tree has only one node, which is the situation we need to decide on. Each node in the search tree contains three basic pieces of information: 1. The situation it represents(game state in the game board) 2. The number of times it has been visited 3. Its cumulative score. 
 It also includes properties of a directional nature, such as whether the node is a node on the maximizer or a node on the minimizer in this game. When determining whether a node is the node on the Maximizer or the node on the Minimizer
 first query the corresponding parent node to determine whether the node is a Maximizer node or a minimizer node by nature. For example, in the first round, the root node is a Maximizer node by default, which means we start as a Maximizer node.
 
 **Implementation:**
 
-The following shows the implementation of the core part of the code (which may involve some detailed descriptions that are not particularly important and we will do our best to explain them initially).
+The following code shows the implementation of the core part (which may involve some detailed descriptions that are not particularly important and we will do our best to explain them initially).
 First, the four steps of selection, expansion, simulation and backpropagation from the heel nodes are performed to simulate as many pairs of games as possible within a specified time frame.
-So, we don't defined how many episodes. We manually define a maximum time frame (for example 0.96 seconds) and stop the creation of the tree at the end of the execution.
+So, we didn't define how many episodes. We manually defined a maximum time frame (for example 0.96 seconds) and stop the creation of the tree at the end of the execution.
 ````
     def mcts(self, timeout=TIMEOUT, root_node=None):
         if root_node is None:
@@ -66,7 +66,7 @@ How do I select a node at the beginning? ( ````selected_node = root_node.select(
                                         actions, self.qfunction, Node.visits, self.agent_id == self.mdp.init_agent_id)
             return self.get_outcome_child(action).select()
 
-Each game is played by choosing the next move from the root node. `select` method will iterate over each child node to select the node with the multi-armed bandit algorithm (The `select` method will be called recursively until it reaches a node that is not fully expanded or a terminal node.). 
+Each game is played by choosing the next move from the root node. `select` method will iterate over each child node to select the node with the multi-armed bandit algorithm (The `select` method will be called recursively until it reaches a node that is not fully expanded or a terminal node). 
 The specific approaches taken here is **Upper Confidence Trees(UCT) strategy**. The Upper Confidence Trees (UCT) algorithm is the combination of MCTS with the UCB1 strategy。
 UCB1 is chosen because of stability, flexibility and simple mathematical formula. It has been proven to better balance the "exploration" and "exploitation" for an accumulated average return reward.
 
@@ -76,7 +76,7 @@ Depending on whether the node is ours or the adversary's (who executes the next 
 ![img_1.png](img_1.png)
 
 When we select nodes, we go down to a node where all of its children are visited at least once.
-For the selected node, randomly pick an action to expand the node (we create a new “leaf” node(an object of `Node` class)).
+For the selected node, randomly pick an action to expand the node (It will create a new “leaf” node(an object of `Node` class)).
 Then, we do the simulation for the leaf node. 
 
 Simulation process(```reward = self.simulate(child)```):
@@ -112,9 +112,9 @@ Simulation process(```reward = self.simulate(child)```):
 
         return random.choice(actions)
 
-Pass the node into the simulate function to simulate it. We use **RollOutPolicy - Random Rollout**, which means that we are guring out a simulated execution policy in testing in the algorithm.
-So, in our code, the `choose()` method is always being "random choosing". However, we do a little improvement here that if the valid actions(x,y) contain any corner location, we would probabilistically choose a corner position.
-Because in the first AI method, we have found corner locations as a beneficial location. It could reduce the probability of AI/agent loosing a turn.
+Pass the node into the simulate function to do simulation process. We use **RollOutPolicy - Random Rollout** in the algorithm.
+So, in our code, the `choose()` method is always being "random choosing". Moreover, we do a little improvement here that if the valid actions(x,y) contain any corner location, we would make it choose a corner position first.
+Because in our first AI method, we have found corner locations as a beneficial location. It could reduce the probability of AI/agent loosing a turn.
 About the **depth of the simulation process**, we stop it until the game ends. 
     
 
@@ -168,8 +168,8 @@ The reasons for the phenomenon would be:
 ## Evolution
 To have a better performance, we have to think about some enhancements. For this algorithm, we tried to optimise the select process.
 Specifically, each time we start a game, the agent have to select an action in the root node, performing a MCST based on multi-bandit algorithm.
-It means that it have to do some exploration. However, for human beings, For experienced players, they will go straight to the valuable positions.
-So, we want to cancel the initial time waste to do exploration. We performed the self-training to record the Q-table and visits table into `.cvs` file. 
+It means that it have to do some exploration. However, for human beings(experienced players), they will go straight to the valuable positions without exploration.
+So, we want to bridge this gap and reducing the AI's exploration process. To achieve that, We performed the self-training to record the Q-table and visits table into `.cvs` file. 
 (As the more game played, the Q-table will contain more accurate values.)
 
 And then, read it to initialise the `Q-function` and `Node.visits` for new games so that the agent could directly choose the best choice instead of exploration.
