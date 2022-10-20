@@ -16,8 +16,17 @@ aspects.
 - [Future improvements](#future-improvements)
 
 ## Motivation  
-Reversi is a zero-sum two player game, meaning if one party gains certain advantages, then the other party
-loses them. 
+It is kinda difficult to utilise the traditional classical planning search algorithms at the first glance for this game
+due to its non-determinism (i.e., what the opponent will play in the next turn is not guaranteed), while the state
+space being super large, therefore measuring heuristics of a state could be a useful approximation of the goal states.
+Since Reversi is a zero-sum two player game, meaning if one party gains certain advantages, then the other part loses
+them, therefore maximising a player's chances of wining minimises the other, and vice versa. This is why Minimax
+becomes useful. As long as the heuristics are meaningful that measure domain knowledge in a reasonable degree, while
+Minimax algorithm discovers possibilities of all states within a pre-defined depth, the AI is expected to make moves
+towards the most promising state to maximise its winning rate. The alpha-beta pruning technique additionally, is used
+to strive on making the agent return the action within the given time limit (1 second), therefore potentially increases
+the depth of the Minimax algorithm that makes the agent more informed about the available actions.
+
 
 [Back to top](#table-of-contents)
 
