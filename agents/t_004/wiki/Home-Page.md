@@ -1,11 +1,6 @@
 # UoM COMP90054 Contest Project
 
-
-
-
-
 ## Team Members
-
 * Zixin Hao - zixhao1@student.unimelb.edu.au - 1309180
 * Yinghua Zhou - yinghuaz@student.unimelb.edu.au - 1308266
 
