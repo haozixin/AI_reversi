@@ -1,2 +1,0 @@
-From the Minimax AI method development, we gained a strong feeling on how Artificial Intelligence could somehow think like a human
-that measures the game states to make the most promising actions based on the integrated knowledge as a human would possess.

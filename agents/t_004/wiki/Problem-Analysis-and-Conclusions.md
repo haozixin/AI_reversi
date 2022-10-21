@@ -86,3 +86,21 @@ opportunities.
  - **AI method 2 -Monte Carlo Tree Search (MCTS):**
 
 There's no explicit notion of defense in our MCTS approach, since we run simulations to observe the most promising actions.
+
+# Conclusions and Learnings
+Throughout this project, we experienced two AI techniques to tackle this specific game program. 
+
+While developing our first agent Minimax, after we possessed the knowledge of the algorithm structure, most of the time 
+we are searching for the ways to integrate the domain knowledge into an AI heuristic format. From the Minimax AI method development, 
+we gained a strong feeling on how Artificial Intelligence could somehow think like a human that measures the game states 
+to make the most promising actions based on the integrated knowledge as a human would possess. There are still quite a lot
+of potentials to integrate more specific domain knowledge in a programmatic manner to enhance the thinking of our Minimax
+agent. 
+
+Throughout our MCTS development, we were more focusing on combining the MCTS algorithm with the game framework and 
+the relevant technical improvements, especially how to converge the Q values as quick as possible while satisfying the time limit,
+and that is why we considered training the Q values by running simulations that could perhaps help the MCTS especially
+at the start to be more informative than having to discover from scratch. However, we realised it would require a significant
+amount of training instances to be able to make noticeable improvements due to the large state space of this problem. While
+the improvements are less observable in progress. Neural Networks could be used to guide the policies and values as discovered
+in various papers as our future improvements towards this approach. Some other techniques like 

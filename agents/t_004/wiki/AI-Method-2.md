@@ -238,15 +238,16 @@ Then, MCTS search can take many iterations to converge to a good solution, which
 ## Future improvements  
 The main enhancements can be considered from the following aspects: 1. Our tree policy is basically learned from scratch; 2. The Rollout Policy we use is also completely random (because we do not have any prior knowledge); 3. In the reverse process we use the simplest Q-Table.
 
-A deep convolutional neural network can be used to train the value network and the policy network. The policy network will be mainly used to determine the probability that this action can be won.
+A deep convolutional neural network can be used to train the value network and the policy network. The policy network will be mainly used to determine the probability of the chances of winning by taking the specific action.
 Value networks are then used to predict the value of each position on the board and then use these values at each node to select the best move.  
 
 We believe it can be optimized to get a better algorithm after combining these two networks with the above three areas.
 
 Moreover, we think adding some domain knowledge to the algorithm can also improve the performance of the algorithm. For example, we can add a heuristic function to the rollout policy to make the algorithm more efficient.
 
-Domain knowledge specific to the current game can be help filter out unlikely moves or to produce rollouts that are more 
-similar to the ones that would occur between human opponents. This has the benefit of rollout results that will be more realistic than random simulations and that nodes will require fewer iterations to yield realistic reward values.
+Domain knowledge specific to the current game can help filter out unlikely moves or to produce rollouts that are more 
+similar to the ones that would occur when against a human player. This has the benefit of rollout results that will be more 
+realistic than random simulations and that nodes will require fewer iterations to yield realistic reward values.
 
 
 [Back to top](#table-of-contents)

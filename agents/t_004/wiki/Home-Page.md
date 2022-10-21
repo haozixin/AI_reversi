@@ -14,19 +14,16 @@ in which our version basically takes elements from the Minimax algorithm, but fo
 heuristics. The implementation of two AI approaches are under the folder `agents.t_004`. 
 Namely, `myTeam.py` for the Minimax approach, and `myTeam2.py` for the MCTS approach.
 
-This wiki presents the details regarding the two methods and the relevant experiments we did. The contents are categorised 5 sections:
+This wiki presents the details regarding the two methods and the relevant experiments we did. The contents are categorised 4 sections:
 1. [Home Page]()
 2. [Approach One](AI-Method-1)
 3. [Approach Two](AI-Method-2)
-4. [Problem-Analysis](Problem-Analysis.md)
-5. [Conclusions and Reflections](Conclusions-and-Reflections)
+4. [Problem Analysis and Conclusions](Problem-Analysis-and-Conclusions.md)
 
 The details about the two AI approaches we discovered and implemented are included in Section 2 and Section 3 respectively.
 The content includes our design decisions and strategies used, challenges we faced, evolution and experiments of the two
 approaches respectively (namely how our AI agent evolved and the results for the experiments we did with analysis), 
 the strengths and weaknesses of the specific approach, with lastly the possible future improvements.
 
-We will present on which approach we decided to use as our final agent with the reasons outlined in the *Problem Analysis* Section,
-with some relative comments and discussions.
-
-We will finally conclude our work in the *Conclusions and Reflections* section with reflections on things we learned.
+We will present on which approach we decided to use as our final agent with the reasons outlined in the *Problem Analysis and Conclusions* Section,
+with some relative comments and discussions. We will finally conclude our work and learnings at the end of the section.
