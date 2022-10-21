@@ -21,8 +21,7 @@ class SingleAgentNode(Node):
         # A dictionary from actions to a set of node-probability pairs
         self.children = {}
 
-    """ Return true if and only if all child actions have been expanded """
-
+    """ Return true if and only if all child actions have been expanded"""
     def is_fully_expanded(self):
         valid_actions = self.mdp.get_actions(self.state, self.agent_id)
         if len(valid_actions) == len(self.children):
@@ -31,7 +30,6 @@ class SingleAgentNode(Node):
             return False
 
     """ Select a node that is not fully expanded """
-
     def select(self):
         if not self.is_fully_expanded() or self.mdp.is_terminal(self.state):
             return self
@@ -43,7 +41,6 @@ class SingleAgentNode(Node):
             return self.get_outcome_child(action).select()
 
     """ Expand a node if it is not a terminal node """
-
     def expand(self):
         if not self.mdp.is_terminal(self.state):
             # Randomly select an unexpanded action to expand
@@ -55,7 +52,6 @@ class SingleAgentNode(Node):
         return self
 
     """ Back propagate the reward back to the parent node """
-
     def back_propagate(self, reward, child):
         action = child.action
 
@@ -73,7 +69,6 @@ class SingleAgentNode(Node):
             self.parent.back_propagate(self.reward + reward, self)
 
     """ Simulate the outcome of an action, and return the child node """
-
     def get_outcome_child(self, action):
         # Find the corresponding state and return if this already exists
         if self.children[action]:

@@ -130,7 +130,9 @@ frontier) where 100 is the 'first layer weight', and the latter value is bounded
 
 Reason: The more frontiers we have, the more actions our opponent can take that can potentially limit us to only bad
 moves. Striving on keeping our pieces surrounded provides potential opportunities later while limits the opponent's 
-actions, as proven by professional advices and experiments.
+actions, as proven by professional advices and experiments. On the other hand, pieces surrounded by others are typically
+relatively harder to be flipped since there's no immediate neighboring squares to directly flip them, whereas those surrounded
+pieces are usually in the centre of a block(s), that are often helpful for example for later capturing corners.
 
 More details about the characteristics and performance measurements are discussed later.
 
@@ -174,34 +176,106 @@ the game approaches the end.
 ## Solved Challenges
 This means that the difficulties (challenges) you were facing when coding and how you solve them.
 
-There are various challenges we encountered throughout the development of this AI approach, as discuss in the following:
+As the minimax algorithm has a relative simple framework compared to other AI methods, the main challenges we encountered
+throughout the development of this one come from how the heuristics should be measured and how the calculations 
+could be improved, as discuss in the following:
+
 1. **Lack of understanding towards the heuristic measurement**
 
-2. 
+  At the beginning especially, since none of us is familiar with how to play Reversi, it was quite hard for us
+  to measure whether a specific game played by the AI agent or a single move is good and how to extract useful info
+  from observations. Whereas this Minimax based AI method heavily relies on the heuristics based on the domain
+  knowledge once the basic algorithm framework is established, therefore we were kinda struggling on how to improve
+  the performance of our agent.
 
+  In order to overcome this challenge, we looked for many research papers in this domain, for example what others 
+  would think when implementing AI techniques for a particular game, especially for Reversi/Othello. We also searched
+  for books that explain Reversi/Othello tricks and integrated some elements that could enhance the specific game
+  thinking of our agent. Once we as developers learned some domain knowledge about the game, we also looked into some 
+  specific game instances, especially the loss our agent during development played against different versions or the 
+  random action player, to observe what actions our agent selected posed noticeable amount of ingredients to the loss,
+  that we could analyse and look for relevant heuristic remedy to progressively enhance our agent performance.
 
-3. **##### Measuring weights for each heuristic components**
+2. **Measuring the weight for each heuristic component**
+  
+  Although the values for the weight for each heuristic component don't really matter by themselves, the relevance among all
+  the components in the measurement does. We weren't able to decide on which heuristic component should be more important
+  at a specific game phase due to our lack of domain knowledge, while it was also hard to visualise how different heuristic
+  component would dominate each other in various circumstances due to the large amount of state spaces and the possible
+  breadth of the Minimax Algorithm especially at where depth=3. Therefore, measuring the weight for each heuristic component
+  was a guide-less task while it could somehow affect the performance of our agent.
 
+  There's not much online discussion about this point as it's a specific thing, we could only look for answers via 
+  experiments. We enabled prints in the meaningful code sections to print the relevant data at different stages, in order to 
+  observe how the values could range at the specific game states. Typically, that if one heuristic component dominates
+  the others by having a noticeably larger difference for many various circumstances based instances when it shouldn't, 
+  we would decrease the weight for that one and observe again, etc. The final weights are tuned through such a way and 
+  also based on our agent performance once after the adjustment against the previous performance.
 
+3. **Heuristic calculation improvements for avoiding timeout on server**
+  
+  We noticed once the frontier heuristic is added, its effectiveness indeed benefits our agent in terms of gaining more
+  actions generally, however, meanwhile more actions in Minimax resulted in significant computational cost increase that
+  caused noticeable amount of timeouts on the server with the same depth. We observed it's not realistic to decrease the
+  depth for a better performance, therefore we had to look into the code structure to perhaps algorithmically improve
+  the computation efficiency in order to maintain the frontier heuristic for our agent as it's noticeable effective.
+
+  We had already updated the generic functions or the game related functions such as generateSuccessor(), and it wasn't
+  enough to bear the cost the frontier heuristic brings. We had to look into our heuristic calculations. We noticed many
+  heuristics are calculated by iterating through the entire board (i.e., 8*8 times), namely the piece count heuristic,
+  static weights and the frontier heuristics, that we could actually combine their calculations together by just running
+  one loop through the board instead of 3 times. This improvement did decrease the number of timeouts on the server as
+  we noticed, however, timeout still happens sometimes although relatively rare, due to the large number of actions to
+  be calculated. Especially when the opponent is also considering the frontier heuristic, both of us would generate
+  a lot of game states within the depth that increases the likelihood of timeout. Such cases rarely happen that doesn't
+  affect our agent performance too much overall, therefore the relevant improvements could be discovered as a future work.
 
 [Back to top](#table-of-contents)
 
 ## Evolution and Experiments
 
+original one v.s. random
+
+
+
+
+newest minimax v.s. random
+
+No static weights
+
+No frontier
+
+
+Lastly, depth=3 vs depth=2
+
 [Back to top](#table-of-contents)
 
 ## Trade-offs  
-### *Strengths*  
+### *Strengths*
+The algorithm framework is relatively simple and much less work to modify the existing minimax
+algorithm into an approach for other zero-sum games, while we mainly just need to focus on constructing
+the heuristic measurements.
 
+Browse all states within the pre-defined depth, 
 
 ### *Limitations*
+Heuristics are fixed thinking strategies, hard to beat experts
+
+depth is limited, the computation cost grows significantly large as the depth increments
+
+strongly relies on the domain knowledge
+
+It's a deterministic approach which assumes the opponent takes the best action based on
+our measurements, meaning we could potentially lose opportunities to further maximise our
+chances of winning if the opponent doesn't go with the one the algorithm would expect.
+
 
 [Back to top](#table-of-contents)
 
 ## Future improvements  
 stability and frontier calculation
 mobility isn't explicitly useful
-consider anchor play
+consider anchor play, to balance frontier heuristic
 consider opening play
 other heuristics in the book
 [Back to top](#table-of-contents)
