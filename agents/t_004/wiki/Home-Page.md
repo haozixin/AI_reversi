@@ -1,5 +1,8 @@
 # UoM COMP90054 Contest Project
 
+## Video Link
+https://www.youtube.com/watch?v=4UrY6XuXeaA
+
 ## Team Members
 * Zixin Hao - zixhao1@student.unimelb.edu.au - 1309180
 * Yinghua Zhou - yinghuaz@student.unimelb.edu.au - 1308266

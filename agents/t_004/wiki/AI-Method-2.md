@@ -1,5 +1,8 @@
 # AI Method 2 - Monte Carlo Tree Search
 
+## Video Link
+https://www.youtube.com/watch?v=4UrY6XuXeaA
+
 # Table of Contents
 - [Motivation](#motivation)
 - [Application](#application)

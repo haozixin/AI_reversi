@@ -1,9 +1,4 @@
 # Analysis of the problem
-
-Analysis the problem
-
-explain which are the techniques that you choose and why
-
 Our final agent is decided to be our AI method 1 - Minimax, upon performance comparison and experiments.
 
 We firstly compared both against the random player:
@@ -103,4 +98,7 @@ and that is why we considered training the Q values by running simulations that 
 at the start to be more informative than having to discover from scratch. However, we realised it would require a significant
 amount of training instances to be able to make noticeable improvements due to the large state space of this problem. While
 the improvements are less observable in progress. Neural Networks could be used to guide the policies and values as discovered
-in various papers as our future improvements towards this approach. Some other techniques like 
+in various papers as our future improvements towards this approach.
+
+## Video Link
+https://www.youtube.com/watch?v=4UrY6XuXeaA

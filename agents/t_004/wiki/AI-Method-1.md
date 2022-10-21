@@ -4,6 +4,8 @@ This section describes our Reversi AI approach based on the Minimax Algorithm wi
 unnecessary calculations, while focusing on the heuristics being used that made meaningful improvements in various
 aspects.
 
+## Video Link
+https://www.youtube.com/watch?v=4UrY6XuXeaA
 
 # Table of Contents
 - [Motivation](#motivation)
