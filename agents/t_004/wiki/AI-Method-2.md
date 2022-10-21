@@ -193,7 +193,7 @@ and it may choose different actions based on the data from the on-line simulatio
 
 1. Choosing valid actions for a state.
 
-In the reversi game, the valid actions is based on agent/player id except for state. So in the complex process of simulation, we have to make sure that the action is valid for the current state. The best solution is save the agent is as object variable,
+In the reversi game, the valid actions is based on agent/player id except for state. So in the complex process of simulation, we have to make sure that the action is valid for the current state. The best solution is save the agent id as object variable,
 which is easy and clear to use.
 2. Comparing two given states to see if they are the same.
 
