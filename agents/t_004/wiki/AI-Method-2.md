@@ -3,10 +3,12 @@
 # Table of Contents
 - [Motivation](#motivation)
 - [Application](#application)
+- [Performance](#performance)
 - [Solved challenges](#solved-challenges)
+- [Evolution](#evolution)
 - [Trade-offs](#trade-offs)
-  * [Advantages](#advantages)
-  * [Disadvantages](#disadvantages)
+  * [Advantages](#strengths)
+  * [Disadvantages](#limitations)
 - [Future improvements](#future-improvements)
 
 ## Motivation  
@@ -165,6 +167,23 @@ The reasons for the phenomenon would be:
  1. simulation time is insufficient. We have tried to set the simulation time up to 3 seconds and found MCTS win rates increase to around 60%.
  2. MCST strategy is specially useful to the "random agent", because, in the process of simulation, we also used the **random-policy** to choose the next action. (more accurate)
 
+
+## Solved Challenges
+
+1. Choosing valid actions for a state.
+
+In the reversi game, the valid actions is based on agent/player id except for state. So in the complex process of simulation, we have to make sure that the action is valid for the current state. The best solution is save the agent id as object variable,
+which is easy and clear to use.
+2. Comparing two given states to see if they are the same.
+
+Since `state` is kind of objects, we cannot directly compare them because they are not the same object(they will return their address).
+The best solution is rewrite the `__eq__` method in the `ReversiState` class, which is easy to use and clear to understand. But we cannot make changes to the original code.
+
+So we abstract the attributes from state (the `state.board` and `state.agent_id`) and convert them into string datatype to see if they are the same.
+The method actually also works for that improvement of MCST.(writing/reading the Q-value and visits table into/from `.cvs` file)
+
+[Back to top](#table-of-contents)
+
 ## Evolution
 To have a better performance, we have to think about some enhancements. For this algorithm, we tried to optimise the select process.
 Specifically, each time we start a game, the agent have to select an action in the root node, performing a MCST based on multi-bandit algorithm.
@@ -186,23 +205,6 @@ guess is that MCTS is a reinforcement learning based on theorem of large numbers
 even if we save the self-trained Q-value, the adversary will continue to learn by reinforcement, 
 and it may choose different actions based on the data from the on-line simulation, so that the improvement is not obvious in the experiment.
 
-
-[Back to top](#table-of-contents)
-
-## Solved Challenges
-
-1. Choosing valid actions for a state.
-
-In the reversi game, the valid actions is based on agent/player id except for state. So in the complex process of simulation, we have to make sure that the action is valid for the current state. The best solution is save the agent id as object variable,
-which is easy and clear to use.
-2. Comparing two given states to see if they are the same.
-
-Since `state` is kind of objects, we cannot directly compare them because they are not the same object(they will return their address).
-The best solution is rewrite the `__eq__` method in the `ReversiState` class, which is easy to use and clear to understand. But we cannot make changes to the original code.
-
-So we abstract the attributes from state (the `state.board` and `state.agent_id`) and convert them into string datatype to see if they are the same.
-The method actually also works for that improvement of MCST.(writing/reading the Q-value and visits table into/from `.cvs` file)
-
 [Back to top](#table-of-contents)
 
 
@@ -210,7 +212,7 @@ The method actually also works for that improvement of MCST.(writing/reading the
 
 Based on the theorem behind it that supports it (the theorem of large numbers), we can know that performance and time are what we need to balance and the entry point for improvement.
 
-### *Advantages*  
+### *Strengths*  
 MCTS provides a better approach than traditional tree search.
 
 **Aheuristic** - 
@@ -226,7 +228,7 @@ This makes MCTS more suitable for games that have larger branching factors, such
 **Any time** - 
 The algorithm can terminate at any time and return the most current estimate. The currently constructed search tree can be discarded or made available for subsequent reuse.
 
-### *Disadvantages*
+### *Limitations*
 Firstly, MCTS, in its basic form, can fail to find reasonable moves for games even of medium complexity within a reasonable amount of time.
 Then, MCTS search can take many iterations to converge to a good solution, which can be an issue for more general applications that are difficult to optimise.
 
