@@ -176,10 +176,10 @@ And then, read it to initialise the `Q-function` and `Node.visits` for new games
 
 After training 100 games. We find out that it has a better performance:
   
-| Agent              | WIN |
-|--------------------|:---|
-| MCTS               | 46% |
-| MCTS after training | 64%|
+| Agent               | WIN |
+|---------------------|:----|
+| MCTS                | 46% |
+| MCTS after training | 64% |
 
 But not as much as we expected, which might because the episodes number are not enough. And another 
 guess is that MCTS is a reinforcement learning based on theorem of large numbers, 
