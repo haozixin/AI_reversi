@@ -1,1 +1,0 @@
-explain which are the techniques that you choose and why

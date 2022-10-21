@@ -451,11 +451,19 @@ rare strategies against it.
 
 Currently, the mobility heuristic doesn't seem to have explicit usefulness in our experiments although noted in many
 places online. We could perhaps research for this aspect more via more experiments to assess its usefulness, whether 
-we should adjust its weight or measure it in a different way.
+we should adjust its weight or measure it in a different way, or perhaps replace it with a different measurement.
 
 4. Stability and Frontier Heuristic Calculations
 
 Both calculations take most of the time resource each time we evaluate a game state, there could be possible potentials
 on further optimising the time complexity of their calculations in an algorithmic way.
+
+5. Dynamic depth
+
+Although the higher the depth, the more computational cost it poses. However, with only a few actions, it is possible to
+traverse deeper within the time limit that helps our agent gain more information than a fixed one. A possible improvement
+in the future could a dynamically changing the depth case by case while making sure the time limit is not conflicted, thereby
+improving the performance of our Minimax agent.
+
 
 [Back to top](#table-of-contents)
